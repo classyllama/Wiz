@@ -1,31 +1,28 @@
 <?php
-/*
-What do we need here?  
-1.  
-
-We need to know where our Magento install is.  We can get this one of a couple of ways
-1.  We can look for it in the current path.
-    a.  How do we know we are in a 
-
-*/
-
-// define('WDS', DIRECTORY_SEPARATOR);
-// define('WPS', PATH_SEPARATOR);
-// define('WBP', dirname(dirname(__FILE__)));
-// 
-// $paths[] = WBP . WDS . 'app' . WDS . 'code' . WDS . 'local';
-// $paths[] = WBP . WDS . 'app' . WDS . 'code' . WDS . 'community';
-// $paths[] = WBP . WDS . 'app' . WDS . 'code' . WDS . 'core';
-// $paths[] = WBP . WDS . 'lib';
-
-// $appPath = implode(WPS, $paths);
-// set_include_path($appPath . WPS . get_include_path());
+/**
+ * Wiz
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * http://opensource.org/licenses/osl-3.0.php
+ *
+ * DISCLAIMER
+ * 
+ * This program is provided to you AS-IS.  There is no warranty.  It has not been
+ * certified for any particular purpose.
+ *
+ * @package    Wiz
+ * @author     Nick Vahalik <nick@classyllama.com>
+ * @copyright  Copyright (c) 2011 Classy Llama Studios
+ * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
 
 // For now, let's eschew extensive command line params in favor of environment variables.
 
-ini_set('date.timezone', 'America/Chicago');
-error_reporting(-1);
-ini_set('display_errors', 1);
+// ini_set('date.timezone', 'America/Chicago');
+// error_reporting(-1);
+// ini_set('display_errors', 1);
 
 /**
  * Primary Wiz class.  Sets up the application and gets everything going.  okay?
@@ -217,6 +214,7 @@ class Wiz {
 
 }
 
+// This is probably not the best place for this, but it works for now.
 class Wiz_Plugin_Abstract {
     public function getActions() {
         $reflector = new ReflectionClass($this);

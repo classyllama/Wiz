@@ -20,9 +20,11 @@
 
 // For now, let's eschew extensive command line params in favor of environment variables.
 
-// ini_set('date.timezone', 'America/Chicago');
-// error_reporting(-1);
-// ini_set('display_errors', 1);
+ini_set('date.timezone', 'America/Chicago');
+error_reporting(-1);
+ini_set('display_errors', 1);
+
+define('WIZ_DS', DIRECTORY_SEPARATOR);
 
 /**
  * Primary Wiz class.  Sets up the application and gets everything going.  okay?
@@ -51,7 +53,7 @@ class Wiz {
     }
 
     function __construct($args = null) {
-        $this->pluginDirectory = dirname(__FILE__). DIRECTORY_SEPARATOR . 'plugins';
+        $this->pluginDirectory = dirname(__FILE__). WIZ_DS . 'plugins';
         $this->_findPlugins();
     }
 
@@ -62,12 +64,23 @@ class Wiz {
     public static function getMagento() {
         static $_magento;
         if (!$_magento) {
-            if (!array_key_exists('WIZ_MAGE_ROOT', $_ENV) 
-                || !is_dir($_ENV['WIZ_MAGE_ROOT'])) {
+            // Did we get a directory from an environment variable?
+            $wizMagentoRoot = array_key_exists('WIZ_MAGE_ROOT', $_ENV) ? $_ENV['WIZ_MAGE_ROOT'] : getcwd();
+
+            // Run through all of the options until either we find something, or we've run out of places to look.
+            do {
+                $magePhpPath = $wizMagentoRoot . WIZ_DS . 'app' . WIZ_DS . 'Mage.php';
+                if ($magePhpIsNotFound = !is_readable($magePhpPath)) {
+                    $wizMagentoRoot = substr($wizMagentoRoot, 0, strrpos($wizMagentoRoot, WIZ_DS));
+                }
+            } while ($magePhpIsNotFound && strlen($wizMagentoRoot));
+
+            // No dice. :-(
+            if ($magePhpIsNotFound)
                 die ('Please specify a Magento root directory by setting WIZ_MAGE_ROOT.'.PHP_EOL);
-            }
-            chdir($_ENV['WIZ_MAGE_ROOT']);
-            
+
+            chdir($wizMagentoRoot);
+
             /**
              * Attempt to bootstrap Magento.
              */

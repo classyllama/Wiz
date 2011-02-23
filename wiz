@@ -1,7 +1,22 @@
-#!/Applications/MAMP/bin/php5.2/bin/php
-<?php
+#!/bin/sh
 
-include 'app/Wiz.php';
+WIZ_SCRIPT_PATH=`dirname $_`
 
-$wiz = new Wiz();
-$wiz->run();
+if [ "" == "$WIZ_PHP_PATH" ]; then
+    IFS=:
+    for p in $PATH; do
+        if [ -x "$p/php" ]; then
+            PHP_VERSION=`$p/php -r 'echo substr(phpversion(), 0, 3);'`
+            if [ "5.2" == "$PHP_VERSION" ]; then
+                WIZ_PHP_PATH="$p/php";
+            fi
+        fi;
+    done
+fi
+
+if [ -z "$WIZ_PHP_PATH" ]; then
+    echo 'Unable to find a PHP 5.2.x executable.  You can specify one by setting WIZ_PHP_PATH.';
+    exit;
+fi
+
+$WIZ_PHP_PATH $WIZ_SCRIPT_PATH/wiz.php $@

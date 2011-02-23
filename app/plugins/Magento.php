@@ -35,4 +35,26 @@ Class Wiz_Plugin_Magento extends Wiz_Plugin_Abstract {
         echo Mage::getVersion().PHP_EOL;
         return TRUE;
     }
+
+    /**
+     * Executes PHP file after bootstrapping Magento.
+     *
+     * @param filename
+     * @author Nicholas Vahalik <nick@classyllama.com>
+     */
+    function scriptAction($options) {
+        if (count($options) < 1) {
+            echo 'Please enter a script to execute.'.PHP_EOL;
+            return FALSE;
+        }
+        elseif (!is_readable($options[0])) {
+            echo 'Please enter a valid filename to execute.'.PHP_EOL;
+            return FALSE;
+        }
+        else {
+            Wiz::getMagento();
+            include $options[0];
+            return TRUE;
+        }
+    }
 }

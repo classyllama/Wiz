@@ -26,8 +26,28 @@
 class Wiz_Plugin_Config extends Wiz_Plugin_Abstract {
 
     public function getAction($options) {
-        echo $options[0] . ' = ' . Wiz::getMagento()->getConfig()->getNode($options[0]);
-        echo PHP_EOL;
+        // Mage_Core_Model_Config_Element
+        $result = Wiz::getMagento()->getConfig()->getNode($options[0]);
+        // we'll either get a false or a Mage_Core_Model_Config_Element object
+        $value = $message = null;
+        if (is_object($result)) {
+            if ($result->hasChildren()) {
+                $childArray = array_keys($result->asArray());
+                $value = '['.implode(', ', $childArray).']';
+            }
+            else {
+                if ((string)$result == '') {
+                    $value = '<empty>';
+                }
+                else {
+                    $value = $result;
+                }
+            }
+            echo $options[0] . ($value ? ' = ' . $value : ' ' . $message).PHP_EOL;
+        }
+        elseif ($result === FALSE) {
+            echo 'Configuration path "' . $options[0] . '" not found.'.PHP_EOL;
+        }
         return TRUE;
     }
 

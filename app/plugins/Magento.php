@@ -52,8 +52,9 @@ Class Wiz_Plugin_Magento extends Wiz_Plugin_Abstract {
             return FALSE;
         }
         else {
+            $path = realpath($options[0]);
             Wiz::getMagento();
-            include $options[0];
+            include $path;
             return TRUE;
         }
     }

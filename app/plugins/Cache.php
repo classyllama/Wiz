@@ -100,17 +100,63 @@ Class Wiz_Plugin_Cache extends Wiz_Plugin_Abstract {
     }
 
     function disableAction($options) {
-        $types = $this->_getAllMagentoCacheTypes();
-        var_dump($types);
+        $caches = $this->_getAllMagentoCacheTypes();
+
+        $didAllCaches = FALSE;
+
+        if (count($options) == 0 || (count($options) == 1 && $options[0] == 'all')) {
+            foreach ($caches as $cache) {
+                $cacheCodesToEnable[] = $cache->getId();
+                $cacheNamesToEnable[] = $cache->getCacheType();
+            }
+            $didAllCaches = TRUE;
+        }
+        else {
+            while (($cacheName = array_shift($options)) != '') {
+                if ($cache = $caches[$cacheName]) {
+                    $cacheCodesToEnable[] = $cacheName;
+                    $cacheNamesToEnable[] = $cache->getCacheType();
+                }
+            }
+        }
+
+        $allTypes = Mage::app()->useCache();
+
+        $updatedTypes = 0;
+        foreach ($cacheCodesToEnable as $code) {
+            if (!empty($allTypes[$code])) {
+                $allTypes[$code] = 0;
+                $updatedTypes++;
+            }
+            Mage::app()->getCacheInstance()->cleanType($code);
+        }
+
+        if ($updatedTypes > 0) {
+            Mage::app()->saveUseCache($allTypes);
+            if ($didAllCaches) {
+                echo 'All caches are now disabled.'.PHP_EOL;
+            }
+            else {
+                echo 'The following cache(s) were disabled: '.implode(', ', $cacheNamesToEnable).PHP_EOL;
+            }
+        }
+        else {
+            echo 'Nothing was done.  Likely they were already disabled.'.PHP_EOL;
+        }
+
         return TRUE;
     }
 
     function statusAction() {
         $types = $this->_getAllMagentoCacheTypes();
-        echo 'Cache status'.PHP_EOL.str_repeat('-', 60).PHP_EOL;
         foreach ($types as $cache) {
-            printf('%-30s (%15s): %10s'.PHP_EOL, $cache->getCacheType(), $cache->getId(), $cache->getStatus() ? 'Enabled' : 'Disabled');
+            $rows[] = array(
+                'Type' => $cache->getCacheType(),
+                'Id' => $cache->getId(),
+                'Status' => $cache->getStatus() ? 'Enabled' : 'Disabled',
+            );
         }
+        echo Wiz::tableOutput($rows);
         return TRUE;
     }
 }

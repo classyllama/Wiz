@@ -61,10 +61,9 @@ class Wiz {
         return $this->getCoreCommandLineArgs();
     }
 
-    public static function getMagento() {
-        static $_magento;
-        if (!$_magento) {
-            // Did we get a directory from an environment variable?
+    static function getMagentoRoot() {
+        static $magentoRoot = FALSE;
+        if ($magentoRoot === FALSE) {
             $wizMagentoRoot = array_key_exists('WIZ_MAGE_ROOT', $_ENV) ? $_ENV['WIZ_MAGE_ROOT'] : getcwd();
 
             // Run through all of the options until either we find something, or we've run out of places to look.
@@ -75,9 +74,22 @@ class Wiz {
                 }
             } while ($magePhpIsNotFound && strlen($wizMagentoRoot));
 
+            if ($magePhpIsNotFound) {
+                $wizMagentoRoot = FALSE;
+            }
+        }
+        return $wizMagentoRoot;
+    }
+
+    public static function getMagento($mode = 'admin') {
+        static $_magento;
+        if (!$_magento) {
+            // Did we get a directory from an environment variable?
+            $wizMagentoRoot = Wiz::getMagentoRoot();
             // No dice. :-(
-            if ($magePhpIsNotFound)
+            if ($wizMagentoRoot === FALSE) {
                 die ('Please specify a Magento root directory by setting WIZ_MAGE_ROOT.'.PHP_EOL);
+            }
 
             chdir($wizMagentoRoot);
 
@@ -93,7 +105,7 @@ class Wiz {
 
             umask(0);
 
-            $_magento = Mage::app('admin');
+            $_magento = Mage::app($mode);
         }
         return $_magento;
     }
@@ -225,6 +237,72 @@ class Wiz {
         return $helpText.PHP_EOL;
     }
 
+    public static function inspect() {
+        $args = func_get_args();
+        call_user_func_array('Wiz_Inspector::inspect', $args);
+    }
+
+    /**
+     * Modified version of the code at the site below:
+     * @see http://www.pyrosoft.co.uk/blog/2007/07/01/php-array-to-text-table-function/
+     */
+    public static function tableOutput($table) {
+        if (!is_array($table) || count($table) < 1 || !is_array($table[0])) {
+            $table = array(array('Result' => 'No Data'));
+        }
+        $keys = array_keys($table[0]);
+        array_push($table, array_combine($keys, $keys));
+        foreach ($table AS $row) {
+            $cell_count = 0;
+            foreach ($row AS $key=>$cell) {
+                $cell_length = strlen($cell);
+                $cell_count++;
+                if (!isset($cell_lengths[$key]) || $cell_length > $cell_lengths[$key]) $cell_lengths[$key] = $cell_length;
+            }    
+        }
+        array_pop($table);
+
+        // Build header bar
+        $bar = '+';
+        $header = '|';
+        $i=0;
+
+        foreach ($cell_lengths AS $fieldname => $length) {
+            $i++;
+            $bar .= str_pad('', $length+2, '-')."+";
+
+            $name = $fieldname;
+            if (strlen($name) > $length) {
+                // crop long headings
+
+                $name = substr($name, 0, $length-1);
+            }
+            $header .= ' '.str_pad($name, $length, ' ', STR_PAD_RIGHT) . " |";
+
+        }
+
+        $output = '';
+
+        $output .= $bar."\n";
+        $output .= $header."\n";
+
+        $output .= $bar."\n";
+
+        // Draw rows
+
+        foreach ($table AS $row) {
+            $output .= "|";
+
+            foreach ($row AS $key=>$cell) {
+                $output .= ' '.str_pad($cell, $cell_lengths[$key], ' ', STR_PAD_RIGHT) . " |";
+
+            }
+            $output .= "\n";
+        }
+
+        $output .= $bar."\n";
+        return $output;
+    }
 }
 
 // This is probably not the best place for this, but it works for now.
@@ -238,5 +316,42 @@ class Wiz_Plugin_Abstract {
             }
         }
         return $_commands;
+    }
+}
+
+class Wiz_Inspector {
+    public static function inspect() {
+        $args = func_get_args();
+        echo __METHOD__.PHP_EOL;
+        $arg = $args[0];
+        if (is_object($arg)) {
+            echo 'Hierarchy:'.PHP_EOL;
+            implode(','.PHP_EOL, self::getParents($arg));
+            // var_dump($args);
+        }
+    }
+
+    public static function getParents($object) {
+        $class = new ReflectionClass($object);
+        $parents = array();
+        $a = 0;
+
+        while ($parent = $class->getParentClass()) {
+            if ($a++ == 5)
+                break;
+            // var_dump($parent);
+            $parents[] = $parent->getName();
+            // var_dump($parents);
+        }
+        return $parents;
+    }
+
+    public static function getMethods($object) {
+        $a = new ReflectionClass($object);
+        foreach ($a->getMethods() as $method) {
+            var_dump($method);
+            echo $method->name.PHP_EOL;
+        }
+        echo PHP_EOL.PHP_EOL;
     }
 }

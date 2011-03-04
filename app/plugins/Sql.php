@@ -48,7 +48,7 @@ class Wiz_Plugin_Sql extends Wiz_Plugin_Abstract {
             }
             echo $key . ' = '. $value.PHP_EOL;
         }
-        echo 'MySQL command line: '."mysql -u{$config['username']} -p{$config['password']} -P{$config['port']} -h{$config['host']} {$config['dbname']}".PHP_EOL;
+        echo 'MySQL command line: '."mysql -u{$config['username']} -p{$config['password']}".( $config['port'] ? " -P{$config['port']}" : '')." -h{$config['host']} {$config['dbname']}".PHP_EOL;
         return TRUE;
     }
 
@@ -61,7 +61,7 @@ class Wiz_Plugin_Sql extends Wiz_Plugin_Abstract {
      */
     public function cliAction($options) {
         $config = $this->_getDbConfig();
-        proc_close(proc_open("mysql -u{$config['username']} -p{$config['password']} -P{$config['port']} -h{$config['host']} {$config['dbname']}", array(0 => STDIN, 1 => STDOUT, 2 => STDERR), $pipes));
+        proc_close(proc_open("mysql -u{$config['username']} -p{$config['password']}".( $config['port'] ? " -P{$config['port']}" : '')." -h{$config['host']} {$config['dbname']}", array(0 => STDIN, 1 => STDOUT, 2 => STDERR), $pipes));
         // echo PHP_EOL;
         return TRUE;
     }

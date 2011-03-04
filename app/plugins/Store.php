@@ -20,6 +20,11 @@
 
 class Wiz_Plugin_Store extends Wiz_Plugin_Abstract {
 
+    /**
+     * Lists all of the stores, store codes, and websites on the magento installation.
+     *
+     * @author Nicholas Vahalik <nick@classyllama.com>
+     */
     public static function listAction() {
         Wiz::getMagento();
         $storeCollection = Mage::getModel('core/store')->getCollection();

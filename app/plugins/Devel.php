@@ -21,6 +21,59 @@
 class Wiz_Plugin_Devel extends Wiz_Plugin_Abstract {
 
     /**
+     * Enables, disables, or displays the value of template hints.
+     * 
+     * To show: wiz devel-showhints
+     * 
+     * To enable: wiz devel-showhints <yes|true|1|totally>
+     * 
+     * To disable: wiz devel-showhints <no|false|0|nah>
+     * 
+     * Note: this will not affect sites if the template hints are overriden via the system
+     * config in the dashboard... for now.
+     *
+     * @author Nicholas Vahalik <nick@classyllama.com>
+     **/
+    public static function showhintsAction($options) {
+        // Display the current values.
+        Wiz::getMagento();
+        $showValue = NULL;
+        if (count($options) > 0) {
+            if (in_array(strtolower($options[0]), array('false', '0', 'no', 'nah'))) {
+                $showValue = 0;
+            }
+            else if (in_array(strtolower($options[0]), array('true', '1', 'yes', 'totally'))) {
+                $showValue = 1;
+            }
+            else {
+                echo 'Invalid option: '.$options[0].PHP_EOL;
+                return TRUE;
+            }
+        }
+
+        foreach (array('dev/debug/template_hints', 'dev/debug/template_hints_blocks') as $shPath) {
+            if ($showValue !== NULL) {
+                Mage::getConfig()->saveConfig($shPath, $showValue);
+            }
+            else {
+                $output[] = array(
+                    'Path' => $shPath,
+                    'Value' => (int)Mage::getConfig()->getNode($shPath, 'default') == 1 ? 'Yes' : 'No'
+                );
+            }
+        }
+
+        if ($showValue !== NULL) {
+            Mage::getConfig()->removeCache();
+        }
+
+        if ($output) {
+            echo Wiz::tableOutput($output);
+        }
+        return TRUE;
+    }
+
+    /**
      * Attempts to output a list of dispatched Magento Events.  Currently, it iterates
      * recursively over the app/ directory and looks for instances where Mage::dispatchEvent
      * is called.  It then outputs the first parameter as the "event."  Some events have

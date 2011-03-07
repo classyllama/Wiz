@@ -60,6 +60,10 @@ Runs an XPath query over Magento's configuration object.  For more information o
 
 Dumps Magento's config as XML.  The default is pretty output, but you can pass the ugly parameter to get no newlines or tabs.
 
+### devel-showhints [true|false|yes|no|1|0|totally|nah]
+
+Without any options, this command simply shows you the global status of template hints and template hint blocks.  By passing it an option, you can either disable or enable template hints globally.  Note that if a site has overridden this value via the system config in the dashboard, it will not have any effect for that site.
+
 ### magento-version
 
 Display's Magento's version.

@@ -165,6 +165,9 @@ class Wiz {
      */
     public function helpAction($options) {
         $command = array_shift($options);
+
+        if ($command == '') $command = 'help';
+
         if (array_key_exists($command, $this->_availableCommands)) {
             if (array_key_exists('documentation', $this->_availableCommands[$command])) {
                 echo "Help for $command:".PHP_EOL.PHP_EOL;

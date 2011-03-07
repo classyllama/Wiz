@@ -10,7 +10,23 @@ Wiz is a CLI interface for Magento.  It aims to provide useful functionality for
 
 ## What can it do?
 
-Wiz currently has the following commands: 
+Functionality is being added to Wiz as time allows.  Currently, Wiz has the following commands.  Please understand that not all of these commands have been tested on every version.  Commands that have not been tested or are in beta are noted as such.
+
+### 301-urlskumap
+
+Dumps a CSV of all SKUs in the catalog in the first column and the link to the product in the second column.  Useful for generating redirects or just plain exporting all product URLs.
+
+### 301-urlcatmap (BETA)
+
+Dumps a CSV of all Categories in the catalog in the first column and a link to the product in the second column.
+
+### 301-htgen (BETA)
+
+Generates .htaccess compatible 301 redirects.  Takes a path to a CSV file as parameter.  CSV file will have the old URL and the SKU as column.  The command will cycle through each SKU and create redirects from the old URL to the new URL using the SKU.
+
+### 301-xmlsm2csv (*UNSTABLE*)
+
+Takes an XML Sitemap and converts it to CSV.  _This functionality is not quite finished yet._
 
 ### admin-createadmin
 
@@ -48,9 +64,44 @@ Dumps Magento's config as XML.  The default is pretty output, but you can pass t
 
 Display's Magento's version.
 
+### magento-script <filename>
+
+Runs a PHP Script after bootstrapping Magento.  Useful for testing code or writing scripts that need to run inside of Magento without having to write a full-fledged module or a sandbox.
+
+### module-list
+
+Displays a list of all modules on the system.  Shows module name, version, active, output, and code pool.
+
+<pre>+------------------------------+------------+--------+----------+-----------+
+| Module Name                  | Version    | Active | Output   | Code Pool |
++------------------------------+------------+--------+----------+-----------+
+| Mage_Core                    | 0.8.26     | Active | Enabled  | core      |
+| Mage_Eav                     | 0.7.15     | Active | Enabled  | core      |
+| Mage_Page                    | 0.7.0      | Active | Enabled  | core      |
+| Mage_Install                 | 0.7.0      | Active | Enabled  | core      |
+| ...                          | ...        | ...    | ...      | ...       |
++------------------------------+------------+--------+----------+-----------+
+</pre>
+
+### module-enable <module> [<module2>, ..., <modulen>]
+
+Enables one or more modules by modifying their config file's active flag.
+
+### module-disable <module> [<module2>, ..., <modulen>]
+
+Disables one or more modules by modifying their config file's active flag.
+
+### module-enableoutput <module> [<module2>, ..., <modulen>]
+
+Enables output for one or more modules.
+
+### module-disableoutput <module> [<module2>, ..., <modulen>]
+
+Disables output for one or more modules.
+
 ### sql-info
 
-Show's Magento's SQL configuration.
+Shows Magento's SQL configuration.
 
 ### sql-cli
 

@@ -98,7 +98,7 @@ class Wiz_Plugin_Devel extends Wiz_Plugin_Abstract {
             $extraClasses = get_declared_classes();
             // var_dump(array_diff($extraClasses, $baseClasses));
             $fileSource = file_get_contents($fileName);
-            preg_match_all('#Mage::dispatchEvent\((.*)\);#m', $fileSource, &$matches);
+            preg_match_all('#Mage::dispatchEvent\((.*)\);#m', $fileSource, $matches);
             if (count($matches) > 1 && count($matches[1]) > 1) {
                 foreach ($matches[1] as $match) {
                     if (strpos($match, ',') !== FALSE) {

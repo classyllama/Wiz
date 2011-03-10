@@ -296,9 +296,15 @@ class Wiz {
         foreach ($table AS $row) {
             $output .= "|";
 
-            foreach ($row AS $key=>$cell) {
-                $output .= ' '.str_pad($cell, $cell_lengths[$key], ' ', STR_PAD_RIGHT) . " |";
-
+            if (is_array($row)) {
+                foreach ($row AS $key=>$cell) {
+                    $output .= ' '.str_pad($cell, $cell_lengths[$key], ' ', STR_PAD_RIGHT) . " |";
+                }
+            }
+            else {
+                foreach ($cell_lengths AS $key=>$length) {
+                    $output .= str_repeat($row, $length+2) . '|';
+                }
             }
             $output .= "\n";
         }
@@ -310,6 +316,42 @@ class Wiz {
 
 // This is probably not the best place for this, but it works for now.
 class Wiz_Plugin_Abstract {
+    /**
+     * Input arguments
+     *
+     * @var array
+     */
+    protected $_args        = array();
+
+    /**
+     * Initialize application with code (store, website code)
+     *
+     * @var string
+     */
+    protected $_appCode     = 'admin';
+
+    /**
+     * Initialize application code type (store, website, store_group)
+     *
+     * @var string
+     */
+    protected $_appType     = 'store';
+
+    /**
+     * Constructor
+     *
+     * @author Nicholas Vahalik <nick@classyllama.com>
+     */
+    public function __construct() {
+        $this->_parseArgs();
+    }
+
+    /**
+     * Returns a list of actions that this plugin contains.
+     *
+     * @return array
+     * @author Nicholas Vahalik <nick@classyllama.com>
+     */
     public function getActions() {
         $reflector = new ReflectionClass($this);
         foreach ($reflector->getMethods() as $reflectionMethod) {
@@ -320,6 +362,44 @@ class Wiz_Plugin_Abstract {
         }
         return $_commands;
     }
+
+    /**
+     * Parse input arguments
+     *
+     * @return Wiz_Plugin_Abstract
+     */
+    protected function _parseArgs() {
+        $current = null;
+        foreach ($_SERVER['argv'] as $arg) {
+            $match = array();
+            if (preg_match('#^--([\w\d_-]{1,})$#', $arg, $match) || preg_match('#^-([\w\d_]{1,})$#', $arg, $match)) {
+                $current = $match[1];
+                $this->_args[$current] = true;
+            } else {
+                if ($current) {
+                    $this->_args[$current] = $arg;
+                } else if (preg_match('#^([\w\d_]{1,})$#', $arg, $match)) {
+                    $this->_args[$match[1]] = true;
+                }
+            }
+        }
+        return $this;
+    }
+
+    /**
+     * Retrieve argument value by name or false
+     *
+     * @param string $name the argument name
+     * @return mixed
+     */
+    public function getArg($name) {
+        if (isset($this->_args[$name])) {
+            return $this->_args[$name];
+        }
+        return false;
+    }
+
+    
 }
 
 class Wiz_Inspector {

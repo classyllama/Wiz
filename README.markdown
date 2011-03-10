@@ -4,9 +4,24 @@ Wiz is a CLI interface for Magento.  It aims to provide useful functionality for
 
 ## How do I use it?
 
-1. Put it somewhere in your path.
-2. Point it to a Magento directory by setting the <code>WIZ\_MAGE_ROOT</code> environment variable.
-3.  Run the program by calling <code>wiz</code> 
+1. Install it (instructions below).
+2. Navigate to a Magento directory.
+3. Run the program by calling <code>wiz</code>.
+4. Optionally, you can set the <code>WIZ\_MAGE\_ROOT</code> environment variable to always point Wiz to a specific location.  If you have multiple sites and want to be able to manipulate multiple sites without having to navigate through directories, you can do this:
+<br/><code>alias wiz1="WIZ\_MAGE\_ROOT=/path/to/site1 ~/bin/Wiz/wiz"
+alias wiz2="WIZ\_MAGE\_ROOT=/path/to/site2 ~/bin/Wiz/wiz"</code><br/>
+Now you can run <code>wiz1</code> from any location and it will run inside the context of the site1.
+
+### Setup instructions (for the less technical)
+
+1. Download Wiz and uncompress it somewhere (probably your Downloads folder)
+2. Open up a shell, type this in: <code>mkdir -p ~/bin/Wiz; open ~/bin/Wiz</code>
+3. Copy all of the files from the folder that was uncompressed into ~/bin/Wiz.  It should be the readme, the app directory, wiz and wiz.php.
+4. Using a text editor, add the following to the .bash_profile in your home directory:
+<br/><code>alias wiz="~/bin/Wiz/wiz"</code>
+5. If you are using Zend Server, you will also need to add the path to PHP 5.2 (since Wiz requires PHP 5.2 at the moment).  On OSX, you would add this to your .bash_profile:
+<br/><code>export WIZ\_PHP\_PATH="/usr/local/zend/bin/php"</code>
+
 
 ## What can it do?
 

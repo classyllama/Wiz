@@ -22,7 +22,6 @@ Now you can run <code>wiz1</code> from any location and it will run inside the c
 5. If you are using Zend Server, you will also need to add the path to PHP 5.2 (since Wiz requires PHP 5.2 at the moment).  On OSX, you would add this to your .bash_profile:
 <br/><code>export WIZ\_PHP\_PATH="/usr/local/zend/bin/php"</code>
 
-
 ## What can it do?
 
 Functionality is being added to Wiz as time allows.  Currently, Wiz has the following commands.  Please understand that not all of these commands have been tested on every version.  Commands that have not been tested or are in beta are noted as such.
@@ -78,6 +77,14 @@ Dumps Magento's config as XML.  The default is pretty output, but you can pass t
 ### devel-showhints [true|false|yes|no|1|0|totally|nah]
 
 Without any options, this command simply shows you the global status of template hints and template hint blocks.  By passing it an option, you can either disable or enable template hints globally.  Note that if a site has overridden this value via the system config in the dashboard, it will not have any effect for that site.
+
+### log-status
+
+Displays the status of the logging tables.
+
+### log-clean
+
+Cleans Magento's logging tables.
 
 ### magento-version
 

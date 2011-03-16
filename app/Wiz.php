@@ -81,7 +81,7 @@ class Wiz {
         return $wizMagentoRoot;
     }
 
-    public static function getMagento($mode = 'admin') {
+    public static function getMagento($scopeCode = 'admin', $scopeId = 'store') {
         static $_magento;
         if (!$_magento) {
             // Did we get a directory from an environment variable?
@@ -105,7 +105,7 @@ class Wiz {
 
             umask(0);
 
-            $_magento = Mage::app($mode);
+            $_magento = Mage::app($scopeCode, $scopeId);
         }
         return $_magento;
     }

@@ -135,22 +135,8 @@ class Wiz_Plugin_Config extends Wiz_Plugin_Abstract {
         return TRUE;
     }
 
-    // public function getallAction($options) {
-    //     // print(__FILE__.':'.__LINE__.'#'.__CLASS__.'->'.__METHOD__);
-    //     $magentoConfig = Wiz::getMagento()->getConfig();
-    // 
-    //     
-    // 
-    //     echo PHP_EOL;
-    //     return TRUE;
-    // }
-    
     public function setAction($options) {
         
-    }
-    
-    public function listAction($options) {
-        var_dump(Wiz::getMagento()->getConfig());
     }
 }
 

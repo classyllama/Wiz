@@ -30,11 +30,10 @@ class Wiz_Plugin_Store extends Wiz_Plugin_Abstract {
         $storeCollection = Mage::getModel('core/store')->getCollection();
         foreach ($storeCollection as $store) {
             $rows[] = array(
-                'store_id' => $store->getStoreId(),
-                'website_id' => $store->getWebsiteId(),
-                'code' => $store->getCode(),
-                'name' => $store->getName(),
-                'is_active' => $store->getIsActive(),
+                'Website (Id)' => $store->getWebsite()->getCode().' ('.$store->getWebsiteId().')'. ($store->getWebsite()->getIsDefault() ? /*" \033[1;37;40m*/' default'/*\033[0m" */: ''),
+                'Group (Id)' => $store->getGroup()->getName().' ('.$store->getGroup()->getId().')',
+                'Code (Id)' => $store->getName() . ' ('.$store->getCode().')',
+                'Active' => $store->getIsActive(),
             );
         }
         echo Wiz::tableOutput($rows);

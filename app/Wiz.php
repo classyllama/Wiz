@@ -121,8 +121,8 @@ class Wiz {
         $pluginFiles = new DirectoryIterator($this->pluginDirectory);
         
         foreach ($pluginFiles as $file) {
-            if ($file->isFile()) {
-                // var_dump($file->getPathname());
+            $fileExtension = substr($file->getFilename(), -3);
+            if ($file->isFile() && $fileExtension == "php") {
                 include($file->getPathname());
                 $plugins[] = basename($file->getFilename(), '.php');
             }

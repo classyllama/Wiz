@@ -71,6 +71,9 @@ Class Wiz_Plugin_Admin extends Wiz_Plugin_Abstract {
     function createadminAction($options) {
         $defaults = $this->_prefillUserData($options);
 
+        // Pull these out in case they exist.
+        extract($defaults);
+
         if (count($options) != 5) {
             do {
                 printf('Login [%s]: ', $defaults['login']);
@@ -97,8 +100,6 @@ Class Wiz_Plugin_Admin extends Wiz_Plugin_Abstract {
                 $password = trim(fgets(STDIN));
             } while ($password == '');
         }
-
-        // extract($defaults);
 
         Wiz::getMagento();
         // Magento CE
@@ -132,6 +133,20 @@ Class Wiz_Plugin_Admin extends Wiz_Plugin_Abstract {
         }
         else {
             echo 'Creating new user on PE/EE...'.PHP_EOL;
+
+            /**
+             * Look for the AdminGWS extension and modify the query if it exists.
+             */
+            $adminGwsQueryAddition = '';
+            $modules = (array)Mage::getConfig()->getNode('modules')->children();
+            if (array_key_exists('Enterprise_AdminGws', $modules)) {
+                // Set the user up to be a global Admin.
+                echo 'AdminGWS detected...'.PHP_EOL;
+                $adminGwsQueryAddition = "1 as gws_is_all,
+                    '' as gws_websites,
+                    '' as gws_storegroups";
+            }
+
             $hashedPassword = hash('sha256', $password); // PE and EE use a SHA-256 hash
             $insertUser = "INSERT INTO admin_user SELECT
             NULL user_id,
@@ -159,7 +174,7 @@ Class Wiz_Plugin_Admin extends Wiz_Plugin_Abstract {
             0 sort_order,
             'U' role_type,
             (SELECT user_id FROM admin_user WHERE username = '$login') user_id,
-            '$login' role_name;".PHP_EOL;
+            '$login' role_name" . ($adminGwsQueryAddition ? ', ' . $adminGwsQueryAddition : '' ) . PHP_EOL;
         }
 
         $connection = Mage::getSingleton('core/resource')->getConnection('core_setup');

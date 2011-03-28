@@ -36,6 +36,8 @@ class Wiz_Plugin_Devel extends Wiz_Plugin_Abstract {
      **/
     public static function showhintsAction($options) {
         // Display the current values.
+        $output = array();
+
         Wiz::getMagento();
         $showValue = NULL;
         if (count($options) > 0) {

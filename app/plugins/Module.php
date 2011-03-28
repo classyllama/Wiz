@@ -123,7 +123,7 @@ class Wiz_Plugin_Module extends Wiz_Plugin_Abstract {
             echo 'Please provide modules names to disable.'.PHP_EOL;
             return TRUE;
         }
-        $modulesDisable = $modulesAlreadyDisabled = $filesToCheck = array();
+        $modulesDisabled = $modulesAlreadyDisabled = $filesToCheck = array();
         Wiz::getMagento();
         $disabled = $alreadyDisabled = FALSE;
         $modules = (array)Mage::getConfig()->getNode('modules')->children();

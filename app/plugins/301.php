@@ -8,7 +8,7 @@ Class Wiz_Plugin_301 extends Wiz_Plugin_Abstract {
      * @author Nicholas Vahalik <nick@classyllama.com>
      */
     function urlskumapAction($options) {
-        Wiz::getMagento('store');
+        Wiz::getMagento('');
         $output = '';
         $products = Mage::getModel('catalog/product')->getCollection();
         foreach ($products as $product) {
@@ -31,7 +31,7 @@ Class Wiz_Plugin_301 extends Wiz_Plugin_Abstract {
      * @author Nicholas Vahalik <nick@classyllama.com>
      */
     function urlcatmapAction($options) {
-        Wiz::getMagento('store');
+        Wiz::getMagento('');
         $output = '';
 
         $categories = Mage::getModel('catalog/category')->getCollection();

@@ -34,7 +34,7 @@ define('WIZ_DS', DIRECTORY_SEPARATOR);
  */
 class Wiz {
 
-    const WIZ_VERSION = '0.8.2-beta';
+    const WIZ_VERSION = '0.9.0-beta';
 
     public static function getWiz() {
         static $_wiz;
@@ -48,17 +48,22 @@ class Wiz {
         return Wiz::WIZ_VERSION;
     }
 
-    public static function getPlugin($code) {
-        
-    }
-
     function __construct($args = null) {
         $this->pluginDirectory = dirname(__FILE__). WIZ_DS . 'plugins';
         $this->_findPlugins();
+        $this->_parseArgs();
     }
 
-    function getAllParameters() {
-        return $this->getCoreCommandLineArgs();
+    static function getUserConfig() {
+        $options = array();
+        if (file_exists($_SERVER['HOME'].'/.wizrc')) {
+                    parse_str(strtr(file_get_contents($_SERVER['HOME'].'/.wizrc'), PHP_EOL, '&'), $options);
+        }
+        return $options;
+    }
+
+    static function setUserConfig($options) {
+        file_put_contents(realpath($_SERVER['HOME'].'/.wizrc'), rawurldecode(http_build_query($options, '', PHP_EOL)));
     }
 
     static function getMagentoRoot() {
@@ -81,11 +86,28 @@ class Wiz {
         return $wizMagentoRoot;
     }
 
+    /**
+     * Instantiates and sets up Magento.  By default, use the admin scopeCode so we run
+     * inside of the administration context.
+     *
+     * @param string $scopeCode 
+     * @param string $scopeId 
+     * @return Mage_Core_Model_App
+     * @author Nicholas Vahalik <nick@classyllama.com>
+     */
     public static function getMagento($scopeCode = 'admin', $scopeId = 'store') {
+
+        /**
+         * Our local copy of the Magento Application Object
+         * 
+         * @see Mage_Core_Model_App
+         */
         static $_magento;
+
         if (!$_magento) {
             // Did we get a directory from an environment variable?
             $wizMagentoRoot = Wiz::getMagentoRoot();
+
             // No dice. :-(
             if ($wizMagentoRoot === FALSE) {
                 die ('Please specify a Magento root directory by setting WIZ_MAGE_ROOT.'.PHP_EOL);
@@ -105,6 +127,16 @@ class Wiz {
 
             umask(0);
 
+            // If someone passes a scope code via he CLI, then use that.
+            foreach (array('store', 'website') as $scope) {
+                if (($argScopeCode = Wiz::getWiz()->getArg($scope)) !== FALSE) {
+                    // If --store is specified, but not provided, use the default.
+                    $scopeCode = $argScopeCode === TRUE ? '' : $argScopeCode;
+                    $scopeId = $scope;
+                    break;
+                }
+            }
+
             $_magento = Mage::app($scopeCode, $scopeId);
         }
         return $_magento;
@@ -123,7 +155,7 @@ class Wiz {
         foreach ($pluginFiles as $file) {
             $fileExtension = substr($file->getFilename(), -3);
             if ($file->isFile() && $fileExtension == "php") {
-                include($file->getPathname());
+                require($file->getPathname());
                 $plugins[] = basename($file->getFilename(), '.php');
             }
         }
@@ -206,7 +238,7 @@ class Wiz {
 
     public function run() {
         $argv = $_SERVER['argv'];
-        // var_dump($argv);
+
         array_shift($argv);
         $command = array_shift($argv);
         if (array_key_exists($command, $this->_availableCommands)) {
@@ -243,6 +275,42 @@ class Wiz {
     public static function inspect() {
         $args = func_get_args();
         call_user_func_array('Wiz_Inspector::inspect', $args);
+    }
+
+    /**
+     * Parse input arguments
+     *
+     * @return Wiz_Plugin_Abstract
+     */
+    protected function _parseArgs() {
+        $current = null;
+        foreach ($_SERVER['argv'] as $arg) {
+            $match = array();
+            if (preg_match('#^--([\w\d_-]{1,})$#', $arg, $match) || preg_match('#^-([\w\d_]{1,})$#', $arg, $match)) {
+                $current = $match[1];
+                $this->_args[$current] = true;
+            } else {
+                if ($current) {
+                    $this->_args[$current] = $arg;
+                } else if (preg_match('#^([\w\d_]{1,})$#', $arg, $match)) {
+                    $this->_args[$match[1]] = true;
+                }
+            }
+        }
+        return $this;
+    }
+
+    /**
+     * Retrieve argument value by name or false
+     *
+     * @param string $name the argument name
+     * @return mixed
+     */
+    public function getArg($name) {
+        if (isset($this->_args[$name])) {
+            return $this->_args[$name];
+        }
+        return false;
     }
 
     /**
@@ -343,7 +411,7 @@ class Wiz_Plugin_Abstract {
      * @author Nicholas Vahalik <nick@classyllama.com>
      */
     public function __construct() {
-        $this->_parseArgs();
+        // $this->_parseArgs();
     }
 
     /**
@@ -362,44 +430,6 @@ class Wiz_Plugin_Abstract {
         }
         return $_commands;
     }
-
-    /**
-     * Parse input arguments
-     *
-     * @return Wiz_Plugin_Abstract
-     */
-    protected function _parseArgs() {
-        $current = null;
-        foreach ($_SERVER['argv'] as $arg) {
-            $match = array();
-            if (preg_match('#^--([\w\d_-]{1,})$#', $arg, $match) || preg_match('#^-([\w\d_]{1,})$#', $arg, $match)) {
-                $current = $match[1];
-                $this->_args[$current] = true;
-            } else {
-                if ($current) {
-                    $this->_args[$current] = $arg;
-                } else if (preg_match('#^([\w\d_]{1,})$#', $arg, $match)) {
-                    $this->_args[$match[1]] = true;
-                }
-            }
-        }
-        return $this;
-    }
-
-    /**
-     * Retrieve argument value by name or false
-     *
-     * @param string $name the argument name
-     * @return mixed
-     */
-    public function getArg($name) {
-        if (isset($this->_args[$name])) {
-            return $this->_args[$name];
-        }
-        return false;
-    }
-
-    
 }
 
 class Wiz_Inspector {

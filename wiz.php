@@ -20,5 +20,5 @@
 
 include 'app/Wiz.php';
 
-$wiz = new Wiz();
+$wiz = Wiz::getWiz();
 $wiz->run();

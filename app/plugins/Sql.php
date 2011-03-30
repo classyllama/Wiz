@@ -82,7 +82,6 @@ class Wiz_Plugin_Sql extends Wiz_Plugin_Abstract {
         $query = mysql_real_escape_string(array_shift($options));
         $config = $this->_getDbConfig();
         if (count($options) > 0 && $options[0] == 'batch') {
-            echo 'hi';
             $batch = '--batch';
         }
         proc_close(proc_open("mysql $batch -u{$config['username']} -p{$config['password']} -P{$config['port']} -h{$config['host']} {$config['dbname']} -e \"$query\"", array(0 => STDIN, 1 => STDOUT, 2 => STDERR), $pipes));

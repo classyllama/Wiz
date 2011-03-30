@@ -119,18 +119,15 @@ class Wiz_Plugin_Config extends Wiz_Plugin_Abstract {
 
     /**
      * Returns the entire Magento config as nicely formatted XML to stdout.
-     *
-     * @param ugly (optional) - Makes the output ugly (no tabs or newlines)
+     * Options:
+     *  --ugly (optional) - Makes the output ugly (no tabs or newlines)
+     * 
      * @return The Magento Configuration as as nicely printed XML File.
      * @author Nicholas Vahalik <nick@classyllama.com>
      */
-    public function asxmlAction($options) {
-        $ugly = 0;
-        if (count($options) > 0 && strtolower($options[0]) == 'ugly') {
-            $ugly = NULL;
-        }
+    public function asxmlAction() {
         Wiz::getMagento();
-        echo Mage::getConfig()->getNode()->asNiceXml('', $ugly);
+        echo Mage::getConfig()->getNode()->asNiceXml('', Wiz::getWiz()->getArg('ugly'));
         echo PHP_EOL;
         return TRUE;
     }

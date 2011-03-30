@@ -131,13 +131,7 @@ Class Wiz_Plugin_301 extends Wiz_Plugin_Abstract {
      * @author Nicholas Vahalik <nick@classyllama.com>
      */
     public function xmlsm2csvAction($options) {
-        $settings['path-only'] = false;
-        foreach ($options as $k => $option) {
-            if (substr($option, 0, 2) == '--') {
-                $settings[substr($option, 2)] = true;
-                unset($options[$k]);
-            }
-        }
+        $settings['path-only'] = Wiz::getWiz()->getArg('path-only');
 
         $filename = array_shift($options);
 

@@ -46,21 +46,6 @@ Class Wiz_Plugin_Magento extends Wiz_Plugin_Abstract {
      * @author Nicholas Vahalik <nick@classyllama.com>
      */
     function scriptAction($options) {
-        $store = 'admin';
-        if (count($options) > 1) {
-            if (($k = array_search('--default-store', $options)) !== FALSE) {
-                unset($options[$k]);
-                $store = '';
-            }
-            if (($k = array_search('--store', $options)) !== FALSE) {
-                $optionArray = array_slice($options, $k, 2);
-                if ($optionArray[1] != '') {
-                    $store = $optionArray[1];
-                }
-                unset($options[$k]);
-                unset($options[$k+1]);
-            }
-        }
         if (count($options) < 1) {
             echo 'Please enter a script to execute.'.PHP_EOL;
             return FALSE;
@@ -71,7 +56,7 @@ Class Wiz_Plugin_Magento extends Wiz_Plugin_Abstract {
         }
         else {
             $path = realpath($options[0]);
-            Wiz::getMagento($store);
+            Wiz::getMagento();
             include $path;
             return TRUE;
         }

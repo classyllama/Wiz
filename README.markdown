@@ -22,6 +22,19 @@ Now you can run <code>wiz1</code> from any location and it will run inside the c
 5. If you are using Zend Server, you will also need to add the path to PHP 5.2 (since Wiz requires PHP 5.2 at the moment).  On OSX, you would add this to your .bash_profile:
 <br/><code>export WIZ\_PHP\_PATH="/usr/local/zend/bin/php"</code>
 
+## Magento Scope Code
+
+By default, Wiz runs inside of the <code>admin</code> scope. This is great for most operations.  However, you may require running Wiz inside of a particular scope.
+
+You can specify the scope Wiz initializes Magento with by specifying the following options:
+
+<code>--store [id|code]</code>
+
+<code>--website [id|code]</code>
+
+By leaving off the id or scope, Wiz will use the default store or website (passing in a blank code).
+
+
 ## What can it do?
 
 Functionality is being added to Wiz as time allows.  Currently, Wiz has the following commands.  Please understand that not all of these commands have been tested on every version.  Commands that have not been tested or are in beta are noted as such.
@@ -70,7 +83,7 @@ Gets a configuration value from the global Magento config.
 
 Runs an XPath query over Magento's configuration object.  For more information on what XPath can do, go check out this [W3School Article on XPath](http://www.w3schools.com/xpath/xpath_syntax.asp).
 
-### config-asxml [ugly]
+### config-asxml [--ugly]
 
 Dumps Magento's config as XML.  The default is pretty output, but you can pass the ugly parameter to get no newlines or tabs.
 
@@ -109,19 +122,19 @@ Displays a list of all modules on the system.  Shows module name, version, activ
 +------------------------------+------------+--------+----------+-----------+
 </pre>
 
-### module-enable <module> [<module2>, ..., <modulen>]
+### module-enable &lt;module&gt; [&lt;module2&gt;, ..., &lt;modulen&gt;]
 
 Enables one or more modules by modifying their config file's active flag.
 
-### module-disable <module> [<module2>, ..., <modulen>]
+### module-disable &lt;module&gt; [&lt;module2&gt;, ..., &lt;modulen&gt;]
 
 Disables one or more modules by modifying their config file's active flag.
 
-### module-enableoutput <module> [<module2>, ..., <modulen>]
+### module-enableoutput &lt;module&gt; [&lt;module2&gt;, ..., &lt;modulen&gt;]
 
 Enables output for one or more modules.
 
-### module-disableoutput <module> [<module2>, ..., <modulen>]
+### module-disableoutput &lt;module&gt; [&lt;module2&gt;, ..., &lt;modulen&gt;]
 
 Disables output for one or more modules.
 

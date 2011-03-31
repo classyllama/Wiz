@@ -34,7 +34,7 @@ define('WIZ_DS', DIRECTORY_SEPARATOR);
  */
 class Wiz {
 
-    const WIZ_VERSION = '0.9.0-beta';
+    const WIZ_VERSION = '0.9.1-beta';
 
     public static function getWiz() {
         static $_wiz;

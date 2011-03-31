@@ -147,6 +147,81 @@ class Wiz {
         return TRUE;
     }
 
+    public function updateAction() {
+
+        $latestVersion = file_get_contents('http://wizcli.com/latest-version');
+        echo 'Current Wiz Version: ' . self::WIZ_VERSION . PHP_EOL;
+        if (version_compare(self::WIZ_VERSION, $latestVersion, 'lt')) {
+            // There is an upgrade available.
+            echo 'Latest Wiz Version: ' . $latestVersion . PHP_EOL;
+            echo 'An upgrade is available.' . PHP_EOL;
+            while (1) {
+                echo 'Do you wish to upgrade? [y,n] ';
+                $input = strtolower(trim(fgets(STDIN)));
+                if (in_array(strtolower($input), array('y', 'n'))) {
+                    break;
+                }
+            }
+            if ($input == 'n') {
+                echo 'Upgrade cancelled.' . PHP_EOL;
+            }
+            else {
+                // Aw snap, it's on now!
+                $ourDirectory = dirname(dirname(__FILE__));
+                
+                // Do a quick sanity check to ensure that we "own" the directory.
+                $objectsInOurDirectory = scandir(dirname(dirname(__FILE__)));
+
+                // Only enable auto-upgrade if we have our own directory.  This will leave some 
+                // people out, but for now it appears most people have it in ~/bin.
+                if (count($objectsInOurDirectory) <= 7 
+                  && in_array('wiz.php', $objectsInOurDirectory)
+                  && in_array('app', $objectsInOurDirectory)
+                  && in_array('wiz', $objectsInOurDirectory)) {
+                    $parentDir = dirname($ourDirectory);
+                    // Then it looks like it is ours... we can go ahead and do the upgrade.
+                    if (is_writable($parentDir)) {
+                        require 'lib/PEAR.php';
+                        require 'lib/Archive/Tar.php';
+                        $latestVersionFile = new Archive_Tar('http://wizcli.com/files/wiz-latest.tgz');
+                        // If the file loaded properly, extract the contents over the current directory.
+                        if (count($latestVersionFile->listContent()) > 0) {
+                            $cwd = getcwd();
+                            chdir($parentDir);
+                            echo 'Removing current directory.' . PHP_EOL;
+                            $this->rrmdir($ourDirectory);
+                            echo 'Extracting files...';
+                            $latestVersionFile->extract($parentDir);
+                            echo 'done.' . PHP_EOL;
+                        }
+                        else {
+                            echo 'There was a problem downloading the latest version.  Unable to continue.' . PHP_EOL;
+                        }
+                    }
+                }
+            }
+        }
+        else {
+            echo 'You are already running the latest version.' . PHP_EOL;
+        }
+
+        // Check the remote service to see what the latest version of Wiz is.
+        return TRUE;
+    }
+
+    private function rrmdir($dir) { 
+        if (is_dir($dir)) { 
+            $objects = scandir($dir); 
+            foreach ($objects as $object) { 
+                if ($object != "." && $object != "..") { 
+                    if (filetype($dir."/".$object) == "dir") $this->rrmdir($dir."/".$object); else unlink($dir."/".$object); 
+                } 
+            } 
+            reset($objects); 
+            rmdir($dir); 
+        } 
+    }
+
     private function _findPlugins() {
 
         $plugins = array();
@@ -177,6 +252,10 @@ class Wiz {
         $this->_availableCommands['help'] = array(
             'class' => 'Wiz',
             'method' => 'helpAction'
+        );
+        $this->_availableCommands['update'] = array(
+            'class' => 'Wiz',
+            'method' => 'updateAction'
         );
         foreach ($this->_availableCommands as $commandName => $commandArray) {
             $functionInfo = new ReflectionMethod($commandArray['class'], $commandArray['method']);

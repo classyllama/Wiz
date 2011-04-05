@@ -10,16 +10,22 @@ Class Wiz_Plugin_301 extends Wiz_Plugin_Abstract {
     function urlskumapAction($options) {
         Wiz::getMagento('');
         $output = '';
-        $products = Mage::getModel('catalog/product')->getCollection();
-        foreach ($products as $product) {
-            if (($sku = trim($product->getSku())) == '')
+        $collection = Mage::getResourceModel('catalog/product_collection')
+            ->setVisibility(array(
+                Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH,
+                Mage_Catalog_Model_Product_Visibility::VISIBILITY_IN_SEARCH,
+                Mage_Catalog_Model_Product_Visibility::VISIBILITY_IN_CATALOG,
+            ));
+            
+        foreach ($collection as $product) {
+            if (($sku = trim($product->getSku())) == '') {
                 continue;
+            }
             $output .= trim($product->getSku()).','.$product->getProductUrl().PHP_EOL;
         }
         if (strpos($options[0], '.') !== FALSE) {
             file_put_contents($options[0], $output);
-        }
-        else {
+        } else {
             echo $output;
         }
         return TRUE;

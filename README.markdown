@@ -59,9 +59,17 @@ Takes an XML Sitemap and converts it to CSV.  _This functionality is not quite f
 
 Creates an Administrative user in the backend.  Has been tested in both CE and PE.
 
-### cache-clear
+### cache-clear [all|invalidated|system|js|css|jscss|images]
 
 Clears the Magento caches.
+
+Optional parameters:
+
+* _all_ - Clears Magento's system cache, general caches, js&css, and images caches.
+* _invalidated_ - Refreshes all invalidated caches.
+* _system_ - Clears Magento's system cache
+* _js_, _css_, _jscss_ - Clears the JavaScript & CSS cache.
+* _images_ - Clears the images cache
 
 ### cache-enable &lt;name&gt;
 
@@ -90,6 +98,22 @@ Dumps Magento's config as XML.  The default is pretty output, but you can pass t
 ### devel-showhints [true|false|yes|no|1|0|totally|nah]
 
 Without any options, this command simply shows you the global status of template hints and template hint blocks.  By passing it an option, you can either disable or enable template hints globally.  Note that if a site has overridden this value via the system config in the dashboard, it will not have any effect for that site.
+
+### indexer-status
+
+Shows the current status of all indexes.
+
+### indexer-reindex &lt;index&gt;
+
+Reindexes an index.
+
+### indexer-realtime &lt;index&gt;
+
+Sets the index to update on save.
+
+### indexer-manual &lt;index&gt;
+
+Set the index to reindex manually.
 
 ### log-status
 

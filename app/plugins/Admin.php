@@ -34,13 +34,6 @@ Class Wiz_Plugin_Admin extends Wiz_Plugin_Abstract {
      **/
     function _prefillUserData($options) {
         $returnArray = array();
-        if (function_exists('posix_getpwnam')) {
-            $userInfo = posix_getpwnam(posix_getlogin());
-            list($first, $last) = explode(' ', $userInfo['gecos']);
-            $returnArray['firstName'] = $first;
-            $returnArray['lastName'] = $last;
-            $returnArray['login'] = posix_getlogin();
-        }
         if (count($options) == 5) {
             $returnArray['login'] = array_shift($options);
             $returnArray['firstName'] = array_shift($options);
@@ -102,90 +95,44 @@ Class Wiz_Plugin_Admin extends Wiz_Plugin_Abstract {
         }
 
         Wiz::getMagento();
-        // Magento CE
+
         $versionInfo = Mage::getVersionInfo();
 
-        if ($versionInfo['major'] == 1 && ($versionInfo['minor'] > 2 && $versionInfo['minor'] < 6)) {
-            $insertUser = "INSERT INTO admin_user SELECT
-            (SELECT MAX(user_id) + 1 FROM admin_user) user_id,
-            '$firstName' first_name,
-            '$lastName' last_name,
-            '$emailAddress' email,
-            '$login' username,
-            MD5('$password') password, /* You can replace this value with an md5 hash */
-            NOW() created,
-            NULL modified,
-            NULL logdate,
-            0 lognum,
-            0 reload_acl_flag,
-            1 is_active,
-            (SELECT MAX(extra) FROM admin_user WHERE extra IS NOT NULL) extra;".PHP_EOL;
+        try {
+            // Create the user
+            $userModel = Mage::getModel('admin/user')
+                ->setUsername($login)
+                ->setFirstname($firstName)
+                ->setLastname($lastName)
+                ->setEmail($emailAddress)
+                ->setPassword($password)
+                ->setIsActive(true)
+                ->save();
 
-            $makeUserAdmin = "INSERT INTO admin_role
-            SELECT
-            (SELECT MAX(role_id) + 1 FROM admin_role) role_id,
-            (SELECT role_id FROM admin_role WHERE role_name = 'Administrators') parent_id,
-            2 tree_level,
-            0 sort_order,
-            'U' role_type,
-            (SELECT user_id FROM admin_user WHERE username = '$login') user_id,
-            '$login' role_name;".PHP_EOL;
-        }
-        else {
-            echo 'Creating new user on PE/EE...'.PHP_EOL;
+            // Load the role collection
+            $collection = Mage::getResourceModel('admin/role_collection');
+            // Only load the roles, not the relationships
+            $collection->setRolesFilter();
 
-            /**
-             * Look for the AdminGWS extension and modify the query if it exists.
-             */
-            $adminGwsQueryAddition = '';
-            $modules = (array)Mage::getConfig()->getNode('modules')->children();
-            if (array_key_exists('Enterprise_AdminGws', $modules)) {
-                // Set the user up to be a global Admin.
-                echo 'AdminGWS detected...'.PHP_EOL;
-                $adminGwsQueryAddition = "1 as gws_is_all,
-                    '' as gws_websites,
-                    '' as gws_storegroups";
+            // Find the administrative role.
+            foreach ($collection as $role) {
+                if (($versionInfo['major'] == 1 && ($versionInfo['minor'] > 2 && $versionInfo['minor'] < 6) 
+                  && $role->getGwsIsAll() == 1) || $role->getRoleName() == 'Administrators') {
+                    $userRoles[] = $role->getId();
+                }
             }
 
-            $hashedPassword = hash('sha256', $password); // PE and EE use a SHA-256 hash
-            $insertUser = "INSERT INTO admin_user SELECT
-            NULL user_id,
-            '$firstName' first_name,
-            '$lastName' last_name,
-            '$emailAddress' email,
-            '$login' username,
-            '$hashedPassword' password,
-            NOW() created,
-            NULL modified,
-            NULL logdate,
-            0 lognum,
-            0 reload_acl_flag,
-            1 is_active,
-            (SELECT MAX(extra) FROM admin_user WHERE extra IS NOT NULL) extra,
-            0 failures_num,
-            NULL first_failure,
-            NULL lock_expires;".PHP_EOL;
+            // Set up the role relationship
+            $userModel->setRoleIds($userRoles)
+                ->setRoleUserId($userModel->getUserId())
+                ->saveRelations();
 
-            $makeUserAdmin = "INSERT INTO admin_role
-            SELECT
-            (SELECT MAX(role_id) + 1 FROM admin_role) role_id,
-            (SELECT role_id FROM admin_role WHERE role_name = 'Administrators') parent_id,
-            2 tree_level,
-            0 sort_order,
-            'U' role_type,
-            (SELECT user_id FROM admin_user WHERE username = '$login') user_id,
-            '$login' role_name" . ($adminGwsQueryAddition ? ', ' . $adminGwsQueryAddition : '' ) . PHP_EOL;
-        }
-
-        $connection = Mage::getSingleton('core/resource')->getConnection('core_setup');
-        try {
-            $connection->multi_query($insertUser.PHP_EOL.$makeUserAdmin);
+            echo "Created new user '$login' with password '$password'.".PHP_EOL;
+            return TRUE;
         }
         catch (Exception $e) {
-            var_dump($e);
+            echo 'Unable to create user: ' . $e->getMessage() . PHP_EOL;
             return FALSE;
         }
-        echo "Created new user '$login' with password '$password'".PHP_EOL;
-        return TRUE;
     }
 }

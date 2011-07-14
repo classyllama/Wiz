@@ -27,17 +27,72 @@ Class Wiz_Plugin_Cache extends Wiz_Plugin_Abstract {
 
     /**
      * Clear the Magento caches.  Same processes used by the Administrative backend.
+     * 
+     * If called as "wiz cache-clear" then we will clear the 
      *
      * @author Nicholas Vahalik <nick@classyllama.com>
      */
     function clearAction($options) {
         Wiz::getMagento();
-        Mage::app()->getCacheInstance()->flush();
 
-        # Clean the Magento storage cache.
-        Mage::app()->cleanCache();
-        echo 'Magento caches have been cleared.'.PHP_EOL;
+        if (count($options) == 0) {
+            $options[] = 'default';
+        }
+
+        $types = array_keys($this->_getAllMagentoCacheTypes());
+
+        if (count($options) == 1 && !in_array($options[0], $types)) {
+            switch ($options[0]) {
+                case 'invalidated':
+                    $this->_cleanCachesById(array_keys(Mage::app()->getCacheInstance()->getInvalidatedTypes()));
+                    break;
+                case 'system':
+                    $this->_cleanSystem();
+                    break;
+                case 'js':
+                case 'css':
+                case 'jscss':
+                    $this->_cleanMedia();
+                    break;
+                case 'images':
+                    $this->_cleanImages();
+                    break;
+                case 'all':
+                    $this->_cleanSystem();
+                    $this->_cleanMedia();
+                    $this->_cleanImages();
+                    $this->_cleanAll();
+                    break;
+                case 'default':
+                    $this->_cleanAll();
+                    break;
+                default:
+            }
+        }
+        else {
+            $this->_cleanCachesById($options);
+        }
+
         return TRUE;
+    }
+
+    function _cleanCachesById($options) {
+        $caches = $this->_getAllMagentoCacheTypes();
+        $cachesCleaned = array();
+
+        foreach ($options as $type) {
+            try {
+                Mage::app()->getCacheInstance()->cleanType($type);
+                $cachesCleaned[] = $caches[$type]->getCacheType();
+            }
+            catch (Exception $e) {
+                echo 'Failed to clear cache: ' . $type . PHP_EOL;
+            }
+        }
+
+        if (count($cachesCleaned) > 0) {
+            echo 'The following caches have been cleaned: ' . implode(', ', $cachesCleaned) . PHP_EOL;
+        }
     }
 
     function _getAllMagentoCacheTypes() {
@@ -149,14 +204,52 @@ Class Wiz_Plugin_Cache extends Wiz_Plugin_Abstract {
 
     function statusAction() {
         $types = $this->_getAllMagentoCacheTypes();
+        $invalidatedTypes = Mage::app()->getCacheInstance()->getInvalidatedTypes();
+
         foreach ($types as $cache) {
             $rows[] = array(
                 'Type' => $cache->getCacheType(),
                 'Id' => $cache->getId(),
-                'Status' => $cache->getStatus() ? 'Enabled' : 'Disabled',
+                'Status' => isset($invalidatedTypes[$cache->getId()]) ? 'Invalidated' : ($cache->getStatus() ? 'Enabled' : 'Disabled'),
             );
         }
         echo Wiz::tableOutput($rows);
         return TRUE;
+    }
+
+    public function _cleanAll() {
+        Mage::app()->getCacheInstance()->flush();
+        echo 'The cache storage has been flushed.' . PHP_EOL;
+    }
+
+    public function _cleanSystem() {
+        Mage::app()->cleanCache();
+        echo 'The Magento cache storage has been flushed.' . PHP_EOL;
+    }
+
+    public function _cleanMedia() {
+        try {
+            Mage::getModel('core/design_package')->cleanMergedJsCss();
+            Mage::dispatchEvent('clean_media_cache_after');
+            echo 'The JavaScript/CSS cache has been cleaned.' . PHP_EOL;
+        }
+        catch (Exception $e) {
+            echo $e->getMessage() . PHP_EOL;
+        }
+    }
+
+    /**
+     * Clean JS/css files cache
+     */
+    public function _cleanImages()
+    {
+        try {
+            Mage::getModel('catalog/product_image')->clearCache();
+            Mage::dispatchEvent('clean_catalog_images_cache_after');
+            echo 'The image cache was cleaned.' . PHP_EOL;
+        }
+        catch (Exception $e) {
+            echo $e->getMessage() . PHP_EOL;
+        }
     }
 }

@@ -76,6 +76,67 @@ class Wiz_Plugin_Devel extends Wiz_Plugin_Abstract {
     }
 
     /**
+     * Returns a list of model names to class maps.  This will also call out rewritten
+     * classes so you can see what type of object you will get when you call
+     * Mage::getModel(_something_).
+     * 
+     *     +------------+-------------------+
+     *     | Model Name | PHP Class         |
+     *     +------------+-------------------+
+     *     | varien/*   | Varien_*          |
+     *     | core/*     | Mage_Core_Model_* |
+     *     | ...        |                   |
+     *     +------------+-------------------+
+     *
+     * Options:
+     *      --all       (shows everything, default)
+     *      --models    (shows only models, not resource models)
+     *      --resources (shows only resource models, not models)
+     * 
+     * @author Nicholas Vahalik <nick@classyllama.com>
+     **/
+    public function modelsAction() {
+        Wiz::getMagento();
+        $modelMapping = array();
+
+        $config = Mage::getConfig();
+
+        $showModels =  Wiz::getWiz()->getArg('models');
+        $showResources =  Wiz::getWiz()->getArg('resources');
+
+        if (Wiz::getWiz()->getArg('all') || (!$showModels && !$showResources)) {
+            $showResources = $showModels = true;
+        }
+
+        foreach ($config->getNode('global/models')->children() as $parent => $children) {
+            if (substr($parent, -7) == '_mysql4' && !$showResources || substr($parent, -7) != '_mysql4' && !$showModels) 
+                continue;
+            foreach ($children->children() as $className => $classData) {
+                switch ($className) {
+                    case 'class':
+                        $modelMapping[] = array(
+                            'Model Name'    => $parent . '/*',
+                            'PHP Class'     => (string)$classData.'_*',
+                        );
+                        break;
+                    case 'rewrite':
+                        foreach ($classData->children() as $rewriteName => $rewriteData) {
+                            $modelMapping[] = array(
+                                'Model Name'    => $parent . '/' . $rewriteName,
+                                'PHP Class'     => (string)$rewriteData,
+                            );
+                        }
+                    default:
+                        break;
+                }
+            }
+        }
+
+        echo Wiz::tableOutput($modelMapping);
+        return TRUE;
+    }
+
+    /**
      * Attempts to output a list of dispatched Magento Events.  Currently, it iterates
      * recursively over the app/ directory and looks for instances where Mage::dispatchEvent
      * is called.  It then outputs the first parameter as the "event."  Some events have

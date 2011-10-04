@@ -22,6 +22,7 @@
 
 ini_set('date.timezone', 'America/Chicago');
 error_reporting(-1);
+require 'lib/Wiz/SimpleXmlElement.php';
 ini_set('display_errors', 1);
 
 define('WIZ_DS', DIRECTORY_SEPARATOR);
@@ -34,7 +35,9 @@ define('WIZ_DS', DIRECTORY_SEPARATOR);
  */
 class Wiz {
 
-    const WIZ_VERSION = '0.9.3-beta';
+    const WIZ_VERSION = '0.9.5';
+
+    static private $config;
 
     public static function getWiz() {
         static $_wiz;
@@ -64,6 +67,33 @@ class Wiz {
 
     static function setUserConfig($options) {
         file_put_contents(realpath($_SERVER['HOME'].'/.wizrc'), rawurldecode(http_build_query($options, '', PHP_EOL)));
+    }
+
+    public static function getConfigPath($path) {
+        return (string)self::getConfig()->descend($path);
+    }
+
+    public static function getConfig() {
+        if (empty(self::$config)) {
+            $potentialFilesToLoad = array(
+                dirname(__FILE__) . WIZ_DS . 'config.xml',
+                dirname(__FILE__) . WIZ_DS . '..' . WIZ_DS . 'config.xml',
+                $_SERVER['HOME'] . WIZ_DS . '.wiz.xml',
+            );
+
+            self::$config = simplexml_load_string('<config />', 'Wiz_Simplexml_Element');
+            foreach ($potentialFilesToLoad as $filePath) {
+                if (file_exists($filePath)) {
+                    self::$config->extendByFile($filePath);
+                }
+            }
+        }
+
+        return self::$config;
+    }
+
+    static function saveConfig() {
+        file_put_contents($_SERVER['HOME'] . WIZ_DS . '.wiz.xml', '<?xml version="1.0"?>'.PHP_EOL.Wiz::getConfig()->asNiceXml());
     }
 
     static function getMagentoRoot() {
@@ -342,7 +372,7 @@ class Wiz {
     public function getHelp() {
         $helpText = 'Wiz version '.Wiz::WIZ_VERSION.PHP_EOL;
         $helpText .= 'Provides a CLI interface to get information from, script, and help you manage'.PHP_EOL;
-        $helpText .= 'your Magento CE installation.'.PHP_EOL;
+        $helpText .= 'your Magento installation.'.PHP_EOL;
         $helpText .= PHP_EOL;
         $helpText .= 'Available commands:'.PHP_EOL;
         foreach ($this->_availableCommands as $commandName => $commandArray) {
@@ -397,6 +427,51 @@ class Wiz {
      * @see http://www.pyrosoft.co.uk/blog/2007/07/01/php-array-to-text-table-function/
      */
     public static function tableOutput($table) {
+        if (Wiz::getWiz()->getArg('batch')) {
+            return Wiz::batchOutput($table);
+        }
+        else {
+            return Wiz::prettyTableOutput($table);
+        }
+    }
+
+    public static function batchOutput($table) {
+        $format = Wiz::getWiz()->getArg('batch');
+        if (!is_array($table) || count($table) < 1 || !is_array($table[0])) {
+            $table = array(array('Result' => 'No Data'));
+        }
+
+        $keys = array_keys($table[0]);
+        $delimiter = $enclosure = '"';
+
+        array_unshift($table, $keys);
+
+        switch ($format) {
+            case 'csv':
+            default:
+                $delimiter = ',';
+                $enclosure = '"';
+                // Quickly put everything 
+                break;
+            case 'pipe':
+                $delimiter = '|';
+                break;
+            case 'tab':
+                $delimiter = "\t";
+                break;
+        }
+
+        // We use some memory here to quickly create a CSV file.
+        $csv = fopen('php://temp/maxmemory:'. (5*1024*1024), 'r+');
+        foreach ($table as $row) {
+            fputcsv($csv, $row, $delimiter, $enclosure);
+        }
+        rewind($csv);
+        $output = stream_get_contents($csv);
+        return $output;
+    }
+
+    public static function prettyTableOutput($table) {
         if (!is_array($table) || count($table) < 1 || !is_array($table[0])) {
             $table = array(array('Result' => 'No Data'));
         }

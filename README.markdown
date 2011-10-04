@@ -34,6 +34,33 @@ You can specify the scope Wiz initializes Magento with by specifying the followi
 
 By leaving off the id or scope, Wiz will use the default store or website (passing in a blank code).
 
+## Output Mode
+
+Wiz now supports the ability to change the table output for batch handling:
+
+<code>--batch [csv|pipe|tab]</code>
+
+If passed without a parameter, csv is the default.  Examples:
+
+<code>$ wiz devel-config --batch<br/>
+Path,Value<br/>
+dev/debug/profiler,No<br/>
+dev/js/merge\_files,No<br/>
+.../code>
+
+<code>$ wiz devel-config --batch pipe<br/>
+Path|Value<br/>
+dev/debug/profiler|No<br/>
+dev/js/merge_files|No<br/>
+...</code>
+
+<code>$ wiz devel-config --batch tab<br/>
+Path	Value<br/>
+dev/debug/profiler	No<br/>
+dev/js/merge_files	No<br/>
+...</code>
+
+You get the idea.  Internally, it uses [fgetcsv()](http://php.net/fputcsv), so it should treat your data well.
 
 ## What can it do?
 
@@ -98,6 +125,40 @@ Dumps Magento's config as XML.  The default is pretty output, but you can pass t
 ### devel-showhints [true|false|yes|no|1|0|totally|nah]
 
 Without any options, this command simply shows you the global status of template hints and template hint blocks.  By passing it an option, you can either disable or enable template hints globally.  Note that if a site has overridden this value via the system config in the dashboard, it will not have any effect for that site.
+
+### devel-logging [true|false|yes|no|1|0|totally|nah]
+
+Enable, disable, or view the status of Magento's logging.
+
+### devel-allowsymlinks [true|false|yes|no|1|0|totally|nah]
+
+Added in Magento 1.5.1.0, you can now specify the ability to use symlinks for templates.  With this command, you can enable, disable, or view the status of it.
+
+### devel-config
+
+Shows all of the devel configuration path statuses.  Useful for just seeing what is enabled.
+
+### devel-profiler [true|false|yes|no|1|0|totally|nah]
+
+Enable, disable, or view the status of Magento's profiler.
+
+### devel-mergejs [true|false|yes|no|1|0|totally|nah]
+
+Enable, disable, or view the status of JS Merging.
+
+### devel-mergecss [true|false|yes|no|1|0|totally|nah]
+
+Enable, disable, or view the status of CSS Merging.
+
+### devel-listeners
+
+Returns a list of all of the registered listeners.  This will give you a list of observer events and what functions (along with their modules) that will respond to those events.
+
+### devel-models
+
+Outputs a list of models that registered with Magento's runtime.  For regular extension model definitions (not rewrites), it will show you the model prefix (e.g. "catalog/\*") and the module prefix that will handle it (e.g. "Mage\_Catalog\_Model_*").
+
+For rewrites, it will show you the overridden model name and the module class that will be used instead.
 
 ### indexer-status
 

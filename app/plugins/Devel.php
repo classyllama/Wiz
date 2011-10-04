@@ -35,11 +35,141 @@ class Wiz_Plugin_Devel extends Wiz_Plugin_Abstract {
      * @author Nicholas Vahalik <nick@classyllama.com>
      **/
     public static function showhintsAction($options) {
+        $this->toggleConfigValue($options, array('dev/debug/template_hints', 'dev/debug/template_hints_blocks'));
+        return TRUE;
+    }
+
+    /**
+     * Enables, disables, or displays the status of logging in Magento.
+     * 
+     * To show: wiz devel-logging
+     * 
+     * To enable: wiz devel-logging <yes|true|1|totally>
+     * 
+     * To disable: wiz devel-logging <no|false|0|nah>
+     * 
+     * @author Nicholas Vahalik <nick@classyllama.com>
+     **/
+    public function loggingAction($options) {
+        $this->toggleConfigValue($options, 'dev/log/active');
+        return TRUE;
+    }
+
+    /**
+     * Enables, disables, or displays the value of symlinks allowed for templates.
+     * 
+     * To show: wiz devel-allowsymlinks
+     * 
+     * To enable: wiz devel-allowsymlinks <yes|true|1|totally>
+     * 
+     * To disable: wiz devel-allowsymlinks <no|false|0|nah>
+     * 
+     * Only compatible with Magento 1.5.1.0+
+     * 
+     * @author Nicholas Vahalik <nick@classyllama.com>
+     **/
+    public function allowsymlinksAction($options) {
+        Wiz::getMagento();
+        $this->toggleConfigValue($options, Mage_Core_Block_Template::XML_PATH_TEMPLATE_ALLOW_SYMLINK);
+        return TRUE;
+    }
+
+    /**
+     * Dumps a set of useful devel configuration values.
+     *
+     * @author Nicholas Vahalik <nick@classyllama.com>
+     */
+    public function configAction($options) {
+        Wiz::getMagento();
+        $values = 
+        array('dev/debug/profiler',
+              'dev/js/merge_files',
+              'dev/css/merge_css_files',
+              'dev/log/active',
+              'dev/debug/template_hints',
+              'dev/debug/template_hints_blocks');
+
+        /**
+         * @todo Refactor this to look at values on a Magento version basis.  Not by trial and error.
+         */
+        if (defined('Mage_Core_Block_Template::XML_PATH_TEMPLATE_ALLOW_SYMLINK')) {
+            $values[] = constant('Mage_Core_Block_Template::XML_PATH_TEMPLATE_ALLOW_SYMLINK');
+        }
+
+        $this->toggleConfigValue(array(),
+            $values);
+        return TRUE;
+    }
+
+    /**
+     * Enables, disables, or displays the status of the profiler.
+     * 
+     * To show: wiz devel-profiler
+     * 
+     * To enable: wiz devel-profiler <yes|true|1|totally>
+     * 
+     * To disable: wiz devel-profiler <no|false|0|nah>
+     * 
+     * @author Nicholas Vahalik <nick@classyllama.com>
+     **/
+    public function profilerAction($options) {
+        Wiz::getMagento();
+        $this->toggleConfigValue($options, 'dev/debug/profiler');
+        return TRUE;
+    }
+
+    /**
+     * Enables, disables, or displays the status of JS Merging.
+     * 
+     * To show: wiz devel-mergejs
+     * 
+     * To enable: wiz devel-mergejs <yes|true|1|totally>
+     * 
+     * To disable: wiz devel-mergejs <no|false|0|nah>
+     * 
+     * @author Nicholas Vahalik <nick@classyllama.com>
+     **/
+    public function mergejsAction($options) {
+        Wiz::getMagento();
+        $this->toggleConfigValue($options, 'dev/js/merge_files');
+        return TRUE;
+    }
+
+    /**
+     * Enables, disables, or displays the status of CSS Merging.
+     * 
+     * To show: wiz devel-mergecss
+     * 
+     * To enable: wiz devel-mergecss <yes|true|1|totally>
+     * 
+     * To disable: wiz devel-mergecss <no|false|0|nah>
+     * 
+     * @author Nicholas Vahalik <nick@classyllama.com>
+     **/
+    public function mergecssAction($options) {
+        Wiz::getMagento();
+        $this->toggleConfigValue($options, 'dev/css/merge_css_files');
+        return TRUE;
+    }
+
+    /**
+     * Generic function to handle enabling, disabling or showing the value of one or
+     * more configuration paths.
+     *
+     * @param array $options
+     * @param array|string Configuration path or paths as an array.
+     * @author Nicholas Vahalik <nick@classyllama.com>
+     */
+    private function toggleConfigValue($options, $values) {
+        if (!is_array($values)) {
+            $values = array($values);
+        }
+
         // Display the current values.
         $output = array();
-
         Wiz::getMagento();
         $showValue = NULL;
+
         if (count($options) > 0) {
             if (in_array(strtolower($options[0]), array('false', '0', 'no', 'nah'))) {
                 $showValue = 0;
@@ -48,19 +178,19 @@ class Wiz_Plugin_Devel extends Wiz_Plugin_Abstract {
                 $showValue = 1;
             }
             else {
-                echo 'Invalid option: '.$options[0].PHP_EOL;
+                echo 'Invalid option: ' . $options[0] . PHP_EOL;
                 return TRUE;
             }
         }
 
-        foreach (array('dev/debug/template_hints', 'dev/debug/template_hints_blocks') as $shPath) {
+        foreach ($values as $value) {
             if ($showValue !== NULL) {
-                Mage::getConfig()->saveConfig($shPath, $showValue);
+                Mage::getConfig()->saveConfig($value, $showValue);
             }
             else {
                 $output[] = array(
-                    'Path' => $shPath,
-                    'Value' => (int)Mage::getConfig()->getNode($shPath, 'default') == 1 ? 'Yes' : 'No'
+                    'Path' => $value,
+                    'Value' => (int)Mage::getConfig()->getNode($value, 'default') == 1 ? 'Yes' : 'No'
                 );
             }
         }
@@ -72,6 +202,35 @@ class Wiz_Plugin_Devel extends Wiz_Plugin_Abstract {
         if ($output) {
             echo Wiz::tableOutput($output);
         }
+        return TRUE;
+    }
+
+    /**
+     * Returns a list of event watchers
+     *
+     * @author Nicholas Vahalik <nick@classyllama.com>
+     **/
+    public function listenersAction() {
+        Wiz::getMagento();
+        $eventListeners = array();
+
+        $config = Mage::getConfig();
+
+        foreach ($config->getNode('global/events')->children() as $parent => $children) {
+            foreach ($children->children() as $childName => $observerInfo) {
+                if ((string)$childName !== 'observers') continue;
+
+                foreach($observerInfo as $observerId => $info) {
+                    $modelMapping[] = array(
+                        'Dispatched event' => $parent,
+                        'Module' => $observerId,
+                        'Method' => $info->class . '::' . $info->method
+                    );
+                }
+            }
+        }
+
+        echo Wiz::tableOutput($modelMapping);
         return TRUE;
     }
 

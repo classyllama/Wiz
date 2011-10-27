@@ -29,11 +29,20 @@ Class Wiz_Plugin_Admin extends Wiz_Plugin_Abstract {
      * Creates an administrative user.  Attempts to use the posix user information if
      * it is available.
      *
-     * @return void
+     * @return array Assocative values to be used when creating the admin account.
      * @author Nicholas Vahalik <nick@classyllama.com>
      **/
     function _prefillUserData($options) {
-        $returnArray = array();
+
+        // Prepopulate so E_STRICT doesn't complain on production servers.
+        $returnArray = array(
+            'login' => '',
+            'firstName' => '',
+            'lastName' => '',
+            'emailAddress' => '',
+            'password' => ''
+        );
+
         if (count($options) == 5) {
             $returnArray['login'] = array_shift($options);
             $returnArray['firstName'] = array_shift($options);
@@ -41,12 +50,12 @@ Class Wiz_Plugin_Admin extends Wiz_Plugin_Abstract {
             $returnArray['emailAddress'] = array_shift($options);
             $returnArray['password'] = array_shift($options);
         }
+
         return $returnArray;
     }
 
     /**
-     * Creates an admin user in the Magento backend.  It uses the SQL script created
-     * by Classy Llama Studios.
+     * Creates an admin user in the Magento backend.
      * 
      * If you pass no parameters, it attempts to use posix data to pre-fill the fields
      * and will prompt you to confirm.  You can also pass it the following parameters
@@ -56,16 +65,11 @@ Class Wiz_Plugin_Admin extends Wiz_Plugin_Abstract {
      * 
      * The password will be MD5-hashed for you when the user is created.
      * 
-     * @see http://classyllama.com/development/magento-development/add-magento-admin-account-using-mysql-script/
-     *
      * @param create user options
      * @author Nicholas Vahalik <nick@classyllama.com>
      */
     function createadminAction($options) {
         $defaults = $this->_prefillUserData($options);
-
-        // Pull these out in case they exist.
-        extract($defaults);
 
         if (count($options) != 5) {
             do {
@@ -92,6 +96,9 @@ Class Wiz_Plugin_Admin extends Wiz_Plugin_Abstract {
                 printf('Password: ');
                 $password = trim(fgets(STDIN));
             } while ($password == '');
+        }
+        else {
+            extract($defaults);
         }
 
         Wiz::getMagento();

@@ -34,7 +34,7 @@ class Wiz_Plugin_Devel extends Wiz_Plugin_Abstract {
      *
      * @author Nicholas Vahalik <nick@classyllama.com>
      **/
-    public static function showhintsAction($options) {
+    public function showhintsAction($options) {
         $this->toggleConfigValue($options, array('dev/debug/template_hints', 'dev/debug/template_hints_blocks'));
         return TRUE;
     }
@@ -69,7 +69,6 @@ class Wiz_Plugin_Devel extends Wiz_Plugin_Abstract {
      * @author Nicholas Vahalik <nick@classyllama.com>
      **/
     public function allowsymlinksAction($options) {
-        Wiz::getMagento();
         $this->toggleConfigValue($options, Mage_Core_Block_Template::XML_PATH_TEMPLATE_ALLOW_SYMLINK);
         return TRUE;
     }
@@ -113,7 +112,6 @@ class Wiz_Plugin_Devel extends Wiz_Plugin_Abstract {
      * @author Nicholas Vahalik <nick@classyllama.com>
      **/
     public function profilerAction($options) {
-        Wiz::getMagento();
         $this->toggleConfigValue($options, 'dev/debug/profiler');
         return TRUE;
     }
@@ -130,7 +128,6 @@ class Wiz_Plugin_Devel extends Wiz_Plugin_Abstract {
      * @author Nicholas Vahalik <nick@classyllama.com>
      **/
     public function mergejsAction($options) {
-        Wiz::getMagento();
         $this->toggleConfigValue($options, 'dev/js/merge_files');
         return TRUE;
     }
@@ -147,7 +144,6 @@ class Wiz_Plugin_Devel extends Wiz_Plugin_Abstract {
      * @author Nicholas Vahalik <nick@classyllama.com>
      **/
     public function mergecssAction($options) {
-        Wiz::getMagento();
         $this->toggleConfigValue($options, 'dev/css/merge_css_files');
         return TRUE;
     }

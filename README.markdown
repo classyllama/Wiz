@@ -22,6 +22,16 @@ Now you can run <code>wiz1</code> from any location and it will run inside the c
 5. If you are using Zend Server, you will also need to add the path to PHP 5.2 (since Wiz requires PHP 5.2 at the moment).  On OSX, you would add this to your .bash_profile:
 <br/><code>export WIZ\_PHP\_PATH="/usr/local/zend/bin/php"</code>
 
+## Bash Completion
+
+To enable bash shell command/TAB completion, put/append the following in `~/.bash_completion` file:
+
+    source $WIZ_HOME/wiz.bash_completion.sh
+
+(replace `$WIZ_HOME` above with the folder location where you extracted Wiz)
+
+Now you can type: wiz <press TAB> to get a list of commands.
+
 ## Magento Scope Code
 
 By default, Wiz runs inside of the <code>admin</code> scope. This is great for most operations.  However, you may require running Wiz inside of a particular scope.

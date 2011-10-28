@@ -54,7 +54,7 @@ class Wiz_Plugin_Config extends Wiz_Plugin_Abstract {
     /**
      * Retrieve a single store configuration node path.
      * 
-     * Example: config-storget sales_email/order/enabled
+     * Example: config-storeget sales_email/order/enabled
      * This will return the value in the configuration if the order e-mails are enabled.
      *
      * @param Node path string.
@@ -69,8 +69,12 @@ class Wiz_Plugin_Config extends Wiz_Plugin_Abstract {
         
         Wiz::getMagento();
 
-        echo "($store) $path" . ' = ' . Mage::getStoreConfig($path);// Wiz::getMagento()->
-        echo PHP_EOL;
+        $value = Mage::getStoreConfig($path);// Wiz::getMagento()->
+        if (is_array($value))
+        	$textValue = '['.implode(', ', array_keys($value)).']';
+        else
+        	$textValue = $value;
+        echo "($store) $path" . ' = ' . $textValue .PHP_EOL; 
         return TRUE;
     }
 
@@ -132,8 +136,22 @@ class Wiz_Plugin_Config extends Wiz_Plugin_Abstract {
         return TRUE;
     }
 
-    public function setAction($options) {
-        
+    /**
+     * config-defaultset CONFIG_PATH VALUE
+     * @param array $options
+     * @return boolean true if successful
+     */
+    public function defaultsetAction($options) {
+    	$configPath = $options[0];
+    	$value = $options[1];
+    	$scope = 'default';
+    	$scopeId = 0;
+    	
+    	$config = Wiz::getMagento()->getConfig();
+    	// this will take effect at *next* invocation
+    	$config->saveConfig($configPath, $value, $scope, $scopeId);
+    	echo "[$scope.$scopeId] $configPath = $value". PHP_EOL;
+    	return true;
     }
 }
 

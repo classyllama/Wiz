@@ -1,6 +1,6 @@
 #!/bin/bash
 
-WIZ_SCRIPT_PATH=`dirname $(readlink -f "$_")`
+WIZ_SCRIPT_PATH=`dirname $_`
 WIZ_REQUIRED_PHP_VERSION="5.2"
 WIZ_FOUND_PHP=0
 

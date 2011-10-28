@@ -35,7 +35,7 @@ _wiz() {
 		config-storeget
 		config-xpath
 		config-asxml
-		config-set
+		config-defaultset
 		indexer-status
 		indexer-reindex
 		indexer-realtime

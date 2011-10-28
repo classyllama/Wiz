@@ -69,8 +69,12 @@ class Wiz_Plugin_Config extends Wiz_Plugin_Abstract {
         
         Wiz::getMagento();
 
-        echo "($store) $path" . ' = ' . Mage::getStoreConfig($path);// Wiz::getMagento()->
-        echo PHP_EOL;
+        $value = Mage::getStoreConfig($path);// Wiz::getMagento()->
+        if (is_array($value))
+        	$textValue = '['.implode(', ', array_keys($value)).']';
+        else
+        	$textValue = $value;
+        echo "($store) $path" . ' = ' . $textValue .PHP_EOL; 
         return TRUE;
     }
 

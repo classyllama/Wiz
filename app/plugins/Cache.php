@@ -218,12 +218,14 @@ Class Wiz_Plugin_Cache extends Wiz_Plugin_Abstract {
     }
 
     public function _cleanAll() {
+        Mage::dispatchEvent('adminhtml_cache_flush_all');
         Mage::app()->getCacheInstance()->flush();
         echo 'The cache storage has been flushed.' . PHP_EOL;
     }
 
     public function _cleanSystem() {
         Mage::app()->cleanCache();
+        Mage::dispatchEvent('adminhtml_cache_flush_system');
         echo 'The Magento cache storage has been flushed.' . PHP_EOL;
     }
 

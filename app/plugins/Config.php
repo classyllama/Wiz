@@ -127,13 +127,41 @@ class Wiz_Plugin_Config extends Wiz_Plugin_Abstract {
      */
     public function asxmlAction() {
         Wiz::getMagento();
-        echo Mage::getConfig()->getNode()->asNiceXml('', Wiz::getWiz()->getArg('ugly'));
+        if (Wiz::getWiz()->getArg('ugly')) {
+            echo Mage::getConfig()->getNode()->asXml();
+        }
+        else {
+            echo Mage::getConfig()->getNode()->asNiceXml();
+        }
         echo PHP_EOL;
         return TRUE;
     }
 
+    
     public function setAction($options) {
-        
+        $scopeCode = 'default';
+        $scopeId = 0;
+
+        foreach (array('store', 'website') as $scope) {
+            if (($argScopeCode = Wiz::getWiz()->getArg($scope)) !== FALSE) {
+                // If --store is specified, but not provided, use the default.
+                $scopeCode = $argScopeCode === TRUE ? '' : $argScopeCode;
+                $scopeId = $scope;
+                $thing = array_search($scope, $options);
+                if ($thing !== FALSE) {
+                    unset($options[$thing]);
+                    unset($options[$thing+1]);
+                }
+                break;
+            }
+        }
+
+        Wiz::getMagento();
+        var_dump(array_shift($options), array_shift($options), $scopeCode, $scopeId);
+        Mage::getConfig()->saveConfig(array_shift($options), array_shift($options), $scopeId, $scopeCode);
+        $cacheSystem = new Wiz_Plugin_Cache();
+        $cacheSystem->_cleanCachesById(array('config'));
+        return TRUE;
     }
 }
 

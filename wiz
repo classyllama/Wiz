@@ -25,5 +25,5 @@ elif [ -z "$WIZ_PHP_PATH" ]; then
     exit;
 fi
 
-$WIZ_PHP_PATH $WIZ_SCRIPT_PATH/wiz.php $@
+$WIZ_PHP_PATH $WIZ_SCRIPT_PATH/wiz.php "$@"
 

@@ -55,6 +55,57 @@ Class Wiz_Plugin_Admin extends Wiz_Plugin_Abstract {
     }
 
     /**
+     * Disable an administrative user.
+     *
+     * @param Username (optional)
+     * @author Nicholas Vahalik <nick@classyllama.com>
+     */
+    function disableAction($options) {
+        $this->changeUserStatus($options, FALSE);
+    }
+
+    /**
+     * Enable an administrative user.
+     *
+     * @param Username (optional)
+     * @author Nicholas Vahalik <nick@classyllama.com>
+     */
+    function enableAction($options) {
+        $this->changeUserStatus($options, TRUE);
+    }
+
+    function changeUserStatus($options, $status) {
+        $username = '';
+
+        switch (count($options)) {
+            case 1:
+                $username = array_pop($options);
+            default:
+        }
+
+        // Asks for what we don't have.
+        while ($username == '') {
+            printf('Login: ');
+            $username = trim(fgets(STDIN));
+        }
+
+        Wiz::getMagento();
+
+        $adminUser = Mage::getModel('admin/user')->loadByUsername($username);
+
+        if (!$adminUser->getId()) {
+            throw new Exception(sprintf('Unable to find user "%s"', $username));
+        }
+
+        $adminUser
+            ->setIsActive($status)
+            ->save();
+
+        $output = array(array('Login' => $username, 'Status' => $status ? 'Active' : 'Inactive'));
+        echo Wiz::tableOutput($output);
+    }
+
+    /**
      * Resets an admin user's password.  If you do not pass the parameters,
      * you will be prompted for them.
      * 
@@ -105,9 +156,7 @@ Class Wiz_Plugin_Admin extends Wiz_Plugin_Abstract {
             $password = Mage::helper('core')->getRandomString(10);
         }
 
-        $adminUserId = Mage::getSingleton('admin/user')->loadByUsername($username)->getId();
-
-        $adminUser = Mage::getModel('admin/user')->load($adminUserId);
+        $adminUser = Mage::getModel('admin/user')->loadByUsername($username);
 
         if (!$adminUser->getId()) {
             throw new Exception(sprintf('Unable to find user "%s"', $username));

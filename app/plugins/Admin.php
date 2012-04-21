@@ -55,6 +55,82 @@ Class Wiz_Plugin_Admin extends Wiz_Plugin_Abstract {
     }
 
     /**
+     * Resets an admin user's password.  If you do not pass the parameters,
+     * you will be prompted for them.
+     * 
+     * Options:
+     *   --send-email   Will send the user an e-mail about their new
+     *                  password.
+     * 
+     *   --random       Will generate a random password.
+     * 
+     *   --show         Will show the password saved to the user.
+     *
+     * @param Username (optional)
+     * @param Password (optional)
+     * @author Nicholas Vahalik <nick@classyllama.com>
+     */
+    function resetpassAction($options) {
+        $username = $password = '';
+
+        foreach ($options as $option) {
+            if (strpos(trim($option), '--') !== 0) {
+                $realParams[] = $option;
+            }
+        }
+
+        // Load up what we have.
+        switch (count($realParams)) {
+            case 2:
+                $password = array_pop($realParams);
+            case 1:
+                $username = array_pop($realParams);
+            default:
+        }
+
+        // Asks for what we don't have.
+        while ($username == '') {
+            printf('Login: ');
+            $username = trim(fgets(STDIN));
+        }
+
+        while ($password == '' && !Wiz::getWiz()->getArg('random')) {
+            printf('New Password: ');
+            $password = trim(fgets(STDIN));
+        };
+
+        Wiz::getMagento();
+
+        if (Wiz::getWiz()->getArg('random')) {
+            $password = Mage::helper('core')->getRandomString(10);
+        }
+
+        $adminUserId = Mage::getSingleton('admin/user')->loadByUsername($username)->getId();
+
+        $adminUser = Mage::getModel('admin/user')->load($adminUserId);
+
+        if (!$adminUser->getId()) {
+            throw new Exception(sprintf('Unable to find user "%s"', $username));
+        }
+
+        $adminUser
+            ->setPassword($password)
+            ->save();
+
+        if (Wiz::getWiz()->getArg('send-email')) {
+            $adminUser->setPlainPassword($password);
+            $adminUser->sendNewPasswordEmail();
+        }
+
+        if (Wiz::getWiz()->getArg('show')) {
+            printf('Password for user "%s" has been changed to "%s".' . PHP_EOL, $username, $password);
+        }
+        else {
+            printf('Password for user "%s" has been updated.' . PHP_EOL, $username);
+        }
+    }
+
+    /**
      * Creates an admin user in the Magento backend.
      * 
      * If you pass no parameters, it attempts to use posix data to pre-fill the fields

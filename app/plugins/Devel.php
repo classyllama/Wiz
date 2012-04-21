@@ -282,14 +282,6 @@ class Wiz_Plugin_Devel extends Wiz_Plugin_Abstract {
         echo Wiz::tableOutput($modelMapping);
     }
 
-    public function origAction($options) {
-        if (count($options) < 1) {
-        }
-
-        $pathToTheFile = getcwd() . WIZ_DS . $options[0];
-        echo PHP_EOL;
-    }
-
     /**
      * Attempts to output a list of dispatched Magento Events.  Currently, it iterates
      * recursively over the app/ directory and looks for instances where Mage::dispatchEvent

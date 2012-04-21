@@ -150,6 +150,12 @@ Class Wiz_Plugin_Cache extends Wiz_Plugin_Abstract {
         }
     }
 
+    /**
+     * Disables caches by name.
+     *
+     * @param One or more caches, separated by a space.
+     * @author Nicholas Vahalik <nick@classyllama.com>
+     */
     function disableAction($options) {
         $caches = $this->_getAllMagentoCacheTypes();
 
@@ -196,6 +202,12 @@ Class Wiz_Plugin_Cache extends Wiz_Plugin_Abstract {
         }
     }
 
+
+    /**
+     * Returns the status of all or named caches.
+     *
+     * @author Nicholas Vahalik <nick@classyllama.com>
+     */
     function statusAction() {
         $types = $this->_getAllMagentoCacheTypes();
         $invalidatedTypes = Mage::app()->getCacheInstance()->getInvalidatedTypes();

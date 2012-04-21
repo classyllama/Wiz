@@ -35,7 +35,7 @@ define('WIZ_DS', DIRECTORY_SEPARATOR);
  */
 class Wiz {
 
-    const WIZ_VERSION = '0.9.5';
+    const WIZ_VERSION = '0.9.6';
 
     static private $config;
 
@@ -328,10 +328,21 @@ class Wiz {
      * @author Nicholas Vahalik <nick@classyllama.com>
      */
     public function listActions() {
+        echo PHP_EOL;
         echo 'Available commands: '.PHP_EOL;
+        echo PHP_EOL;
         foreach ($this->_availableCommands as $commandName => $commandArray) {
-            echo $commandName.PHP_EOL;
+            if(!array_key_exists('documentation', $commandArray) || trim($commandArray['documentation']) == '') {
+                continue;
+            }
+            $docLines = explode(PHP_EOL, $commandArray['documentation']);
+            $docLineOne = array_shift($docLines);
+            if (($endOfSentence = strpos($docLineOne, '.')) !== FALSE) {
+                $docLineOne = substr($docLineOne, 0, $endOfSentence + 1);
+            }
+            printf('  %-23s %s' . PHP_EOL, $commandName, $docLineOne);
         }
+        echo PHP_EOL;
     }
 
     function _initWiz() {
@@ -369,14 +380,45 @@ class Wiz {
     }
 
     public function getHelp() {
-        $helpText = 'Wiz version '.Wiz::WIZ_VERSION.PHP_EOL;
+        $helpText = 'Wiz v'.Wiz::WIZ_VERSION.PHP_EOL;
         $helpText .= 'Provides a CLI interface to get information from, script, and help you manage'.PHP_EOL;
         $helpText .= 'your Magento installation.'.PHP_EOL;
         $helpText .= PHP_EOL;
-        $helpText .= 'Available commands:'.PHP_EOL;
-        foreach ($this->_availableCommands as $commandName => $commandArray) {
-            $helpText .= '  '.$commandName.PHP_EOL;
-        }
+        $helpText .= 'Usage:';
+        $helpText .= PHP_EOL;
+        $helpText .= '  wiz [global-options] <command> [command-options]';
+        $helpText .= PHP_EOL;
+        $helpText .= '                Runs a command.';
+        $helpText .= PHP_EOL;
+        $helpText .= PHP_EOL;
+        $helpText .= '  wiz help <command>';
+        $helpText .= PHP_EOL;
+        $helpText .= '                Returns help on a command.';
+        $helpText .= PHP_EOL;
+        $helpText .= PHP_EOL;
+        $helpText .= '  wiz command-list';
+        $helpText .= PHP_EOL;
+        $helpText .= '                Returns the list of available commands.';
+        $helpText .= PHP_EOL;
+        $helpText .= PHP_EOL;
+        $helpText .= 'Global Options:';
+        $helpText .= PHP_EOL;
+        $helpText .= '  --batch [csv|pipe|tab]';
+        $helpText .= PHP_EOL;
+        $helpText .= '                Returns tabular data in a parseable format.  Defaults to "csv"';
+        $helpText .= PHP_EOL;
+        $helpText .= PHP_EOL;
+        $helpText .= '  --store <store-code|store-id>,';
+        $helpText .= PHP_EOL;
+        $helpText .= '  --website <website-code|website-id>';
+        $helpText .= PHP_EOL;
+        $helpText .= '                Executes Magento as this particular store or website.';
+        $helpText .= PHP_EOL;
+        $helpText .= PHP_EOL;
+        // $helpText .= 'Available commands:'.PHP_EOL;
+        // foreach ($this->_availableCommands as $commandName => $commandArray) {
+        //     $helpText .= '  '.$commandName.PHP_EOL;
+        // }
         return $helpText.PHP_EOL;
     }
 

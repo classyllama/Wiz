@@ -25,6 +25,12 @@
  */
 class Wiz_Plugin_Config extends Wiz_Plugin_Abstract {
 
+    /**
+     * Returns the value stored in Magento for the given config path.
+     *
+     * @param Configuration path.
+     * @author Nicholas Vahalik <nick@classyllama.com>
+     */
     public function getAction($options) {
         // Mage_Core_Model_Config_Element
         $result = Wiz::getMagento()->getConfig()->getNode($options[0]);

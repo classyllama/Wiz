@@ -72,8 +72,6 @@ Class Wiz_Plugin_Cache extends Wiz_Plugin_Abstract {
         else {
             $this->_cleanCachesById($options);
         }
-
-        return TRUE;
     }
 
     function _cleanCachesById($options) {
@@ -150,8 +148,6 @@ Class Wiz_Plugin_Cache extends Wiz_Plugin_Abstract {
         else {
             echo 'Nothing was done.  Likely they were already enabled.'.PHP_EOL;
         }
-
-        return TRUE;
     }
 
     function disableAction($options) {
@@ -198,8 +194,6 @@ Class Wiz_Plugin_Cache extends Wiz_Plugin_Abstract {
         else {
             echo 'Nothing was done.  Likely they were already disabled.'.PHP_EOL;
         }
-
-        return TRUE;
     }
 
     function statusAction() {
@@ -214,7 +208,6 @@ Class Wiz_Plugin_Cache extends Wiz_Plugin_Abstract {
             );
         }
         echo Wiz::tableOutput($rows);
-        return TRUE;
     }
 
     public function _cleanAll() {

@@ -36,7 +36,6 @@ class Wiz_Plugin_Devel extends Wiz_Plugin_Abstract {
      **/
     public function showhintsAction($options) {
         $this->toggleConfigValue($options, array('dev/debug/template_hints', 'dev/debug/template_hints_blocks'));
-        return TRUE;
     }
 
     /**
@@ -52,7 +51,6 @@ class Wiz_Plugin_Devel extends Wiz_Plugin_Abstract {
      **/
     public function loggingAction($options) {
         $this->toggleConfigValue($options, 'dev/log/active');
-        return TRUE;
     }
 
     /**
@@ -69,8 +67,8 @@ class Wiz_Plugin_Devel extends Wiz_Plugin_Abstract {
      * @author Nicholas Vahalik <nick@classyllama.com>
      **/
     public function allowsymlinksAction($options) {
+        Wiz::getMagento();
         $this->toggleConfigValue($options, Mage_Core_Block_Template::XML_PATH_TEMPLATE_ALLOW_SYMLINK);
-        return TRUE;
     }
 
     /**
@@ -97,7 +95,6 @@ class Wiz_Plugin_Devel extends Wiz_Plugin_Abstract {
 
         $this->toggleConfigValue(array(),
             $values);
-        return TRUE;
     }
 
     /**
@@ -113,7 +110,6 @@ class Wiz_Plugin_Devel extends Wiz_Plugin_Abstract {
      **/
     public function profilerAction($options) {
         $this->toggleConfigValue($options, 'dev/debug/profiler');
-        return TRUE;
     }
 
     /**
@@ -129,7 +125,6 @@ class Wiz_Plugin_Devel extends Wiz_Plugin_Abstract {
      **/
     public function mergejsAction($options) {
         $this->toggleConfigValue($options, 'dev/js/merge_files');
-        return TRUE;
     }
 
     /**
@@ -145,7 +140,6 @@ class Wiz_Plugin_Devel extends Wiz_Plugin_Abstract {
      **/
     public function mergecssAction($options) {
         $this->toggleConfigValue($options, 'dev/css/merge_css_files');
-        return TRUE;
     }
 
     /**
@@ -174,8 +168,8 @@ class Wiz_Plugin_Devel extends Wiz_Plugin_Abstract {
                 $showValue = 1;
             }
             else {
+                // @todo - Exception
                 echo 'Invalid option: ' . $options[0] . PHP_EOL;
-                return TRUE;
             }
         }
 
@@ -198,7 +192,6 @@ class Wiz_Plugin_Devel extends Wiz_Plugin_Abstract {
         if ($output) {
             echo Wiz::tableOutput($output);
         }
-        return TRUE;
     }
 
     /**
@@ -227,7 +220,6 @@ class Wiz_Plugin_Devel extends Wiz_Plugin_Abstract {
         }
 
         echo Wiz::tableOutput($modelMapping);
-        return TRUE;
     }
 
     /**
@@ -288,7 +280,14 @@ class Wiz_Plugin_Devel extends Wiz_Plugin_Abstract {
         }
 
         echo Wiz::tableOutput($modelMapping);
-        return TRUE;
+    }
+
+    public function origAction($options) {
+        if (count($options) < 1) {
+        }
+
+        $pathToTheFile = getcwd() . WIZ_DS . $options[0];
+        echo PHP_EOL;
     }
 
     /**
@@ -300,7 +299,7 @@ class Wiz_Plugin_Devel extends Wiz_Plugin_Abstract {
      * @return void
      * @author Nicholas Vahalik <nick@classyllama.com>
      */
-    public static function eventsAction() {
+    public function eventsAction() {
         Wiz::getMagento();
         $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(Wiz::getMagentoRoot().DIRECTORY_SEPARATOR.'app'));
         foreach ($iterator as $file) {
@@ -339,6 +338,5 @@ class Wiz_Plugin_Devel extends Wiz_Plugin_Abstract {
             $eventOutput[] = array('Event Name' => $eventName);
         }
         echo Wiz::tableOutput($eventOutput);
-        return TRUE;
     }    
 }   

@@ -22,7 +22,6 @@ Class Wiz_Plugin_301 extends Wiz_Plugin_Abstract {
         else {
             echo $output;
         }
-        return TRUE;
     }
 
     /**
@@ -59,7 +58,6 @@ Class Wiz_Plugin_301 extends Wiz_Plugin_Abstract {
         else {
             echo $output;
         }
-        return TRUE;
     }
 
     /**
@@ -79,8 +77,7 @@ Class Wiz_Plugin_301 extends Wiz_Plugin_Abstract {
     function htgenAction($options) {
         $filename = realpath($options[0]);
         if (!file_exists($filename)) {
-            file_put_contents('php://stderr', 'Need a file to generate 301 mappings.'.PHP_EOL);
-            return FALSE;
+            throw new Exception('Need a file to generate 301 mappings.');
         }
         else {
             file_put_contents('php://stderr', 'Reading current mappings from '.$filename.PHP_EOL);
@@ -120,7 +117,6 @@ Class Wiz_Plugin_301 extends Wiz_Plugin_Abstract {
                      .$errors.PHP_EOL;
             file_put_contents('php://stderr', $errors);
         }
-        return TRUE;
     }
 
     /**
@@ -139,8 +135,7 @@ Class Wiz_Plugin_301 extends Wiz_Plugin_Abstract {
             case 'xml':
                 $xml = simplexml_load_file($filename);
                 if ($xml->getName() != 'urlset') {
-                    echo 'This does not look like an XML sitemap.';
-                    return FALSE;
+                    throw new Exception('This does not look like an XML sitemap.');
                 }
                 $output = fopen('php://temp', 'rw');
                 foreach ($xml->url as $node) {
@@ -159,9 +154,7 @@ Class Wiz_Plugin_301 extends Wiz_Plugin_Abstract {
                 }
                 break;
             default:
-                echo 'I do not know how to handle that.'.PHP_EOL;
-                return FALSE;
+                throw new Exception('Invalid file format.');
         }
-        return TRUE;
     }
 }

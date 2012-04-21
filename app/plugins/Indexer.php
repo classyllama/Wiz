@@ -89,7 +89,6 @@ class Wiz_Plugin_Indexer extends Wiz_Plugin_Abstract {
             $rows[] = $row;
         }
         echo Wiz::tableOutput($rows);
-        return TRUE;
     }
 
     /**
@@ -121,7 +120,6 @@ class Wiz_Plugin_Indexer extends Wiz_Plugin_Abstract {
                 echo $e . PHP_EOL;
             }
         }
-        return TRUE;
     }
 
     private function _setMode($processes, $mode) {
@@ -154,7 +152,6 @@ class Wiz_Plugin_Indexer extends Wiz_Plugin_Abstract {
         $processes = $this->_parseIndexerString(count($options) == 0 ? 'all' : implode(',', $options));
         $updated  = $this->_setMode($processes, Mage_Index_Model_Process::MODE_REAL_TIME);
         echo 'Index' . (count($updated) > 1 ? 'es' : '') . ' set to Update on Save: ' . implode(', ', $updated) . PHP_EOL;
-        return TRUE;
     }
 
     /**
@@ -169,6 +166,5 @@ class Wiz_Plugin_Indexer extends Wiz_Plugin_Abstract {
         $processes = $this->_parseIndexerString(count($options) == 0 ? 'all' : implode(',', $options));
         $updated = $this->_setMode($processes, Mage_Index_Model_Process::MODE_MANUAL);
         echo 'Index' . (count($updated) > 1 ? 'es' : '') . ' set to Manual: ' . implode(', ', $updated) . PHP_EOL;
-        return TRUE;
     }
 }

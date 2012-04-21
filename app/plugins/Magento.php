@@ -33,7 +33,6 @@ Class Wiz_Plugin_Magento extends Wiz_Plugin_Abstract {
     function versionAction() {
         Wiz::getMagento();
         echo Mage::getVersion().PHP_EOL;
-        return TRUE;
     }
 
     /**
@@ -58,7 +57,6 @@ Class Wiz_Plugin_Magento extends Wiz_Plugin_Abstract {
             $path = realpath($options[0]);
             Wiz::getMagento();
             include $path;
-            return TRUE;
         }
     }
 }

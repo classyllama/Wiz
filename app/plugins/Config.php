@@ -48,13 +48,12 @@ class Wiz_Plugin_Config extends Wiz_Plugin_Abstract {
         elseif ($result === FALSE) {
             echo 'Configuration path "' . $options[0] . '" not found.'.PHP_EOL;
         }
-        return TRUE;
     }
 
     /**
      * Retrieve a single store configuration node path.
      * 
-     * Example: config-storeget sales_email/order/enabled
+     * Example: config-storget sales_email/order/enabled
      * This will return the value in the configuration if the order e-mails are enabled.
      *
      * @param Node path string.
@@ -69,13 +68,8 @@ class Wiz_Plugin_Config extends Wiz_Plugin_Abstract {
         
         Wiz::getMagento();
 
-        $value = Mage::getStoreConfig($path);// Wiz::getMagento()->
-        if (is_array($value))
-        	$textValue = '['.implode(', ', array_keys($value)).']';
-        else
-        	$textValue = $value;
-        echo "($store) $path" . ' = ' . $textValue .PHP_EOL; 
-        return TRUE;
+        echo "($store) $path" . ' = ' . Mage::getStoreConfig($path);// Wiz::getMagento()->
+        echo PHP_EOL;
     }
 
     /**
@@ -105,7 +99,6 @@ class Wiz_Plugin_Config extends Wiz_Plugin_Abstract {
             $parentArray = array_reverse($parentArray);
             $this->_recurseXpathOutput($parentArray, $result);
         }
-        return TRUE;
     }
 
     private function _recurseXpathOutput($parents, $xmlelement) {
@@ -131,58 +124,15 @@ class Wiz_Plugin_Config extends Wiz_Plugin_Abstract {
      */
     public function asxmlAction() {
         Wiz::getMagento();
-        if (Wiz::getWiz()->getArg('ugly')) {
-            echo Mage::getConfig()->getNode()->asXml();
+
+        if (Wiz::getWiz()->getArg('system')) {
+            $xml = Mage::getConfig()->loadModulesConfiguration('system.xml');
         }
         else {
-            echo Mage::getConfig()->getNode()->asNiceXml();
+            $xml = Mage::getConfig();
         }
+        echo $xml->getNode()->asNiceXml('', Wiz::getWiz()->getArg('ugly'));
         echo PHP_EOL;
-        return TRUE;
-    }
-
-    public function setAction($options) {
-        $scopeCode = 'default';
-        $scopeId = 0;
-
-        foreach (array('store', 'website') as $scope) {
-            if (($argScopeCode = Wiz::getWiz()->getArg($scope)) !== FALSE) {
-                // If --store is specified, but not provided, use the default.
-                $scopeCode = $argScopeCode === TRUE ? '' : $argScopeCode;
-                $scopeId = $scope;
-                $thing = array_search($scope, $options);
-                if ($thing !== FALSE) {
-                    unset($options[$thing]);
-                    unset($options[$thing+1]);
-                }
-                break;
-            }
-        }
-
-        Wiz::getMagento();
-        var_dump(array_shift($options), array_shift($options), $scopeCode, $scopeId);
-        Mage::getConfig()->saveConfig(array_shift($options), array_shift($options), $scopeId, $scopeCode);
-        $cacheSystem = new Wiz_Plugin_Cache();
-        $cacheSystem->_cleanCachesById(array('config'));
-        return TRUE;
-    }
-
-    /**
-     * config-defaultset CONFIG_PATH VALUE
-     * @param array $options
-     * @return boolean true if successful
-     */
-    public function defaultsetAction($options) {
-    	$configPath = $options[0];
-    	$value = $options[1];
-    	$scope = 'default';
-    	$scopeId = 0;
-    	
-    	$config = Wiz::getMagento()->getConfig();
-    	// this will take effect at *next* invocation
-    	$config->saveConfig($configPath, $value, $scope, $scopeId);
-    	echo "[$scope.$scopeId] $configPath = $value". PHP_EOL;
-    	return true;
     }
 }
 

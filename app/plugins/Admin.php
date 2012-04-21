@@ -135,11 +135,9 @@ Class Wiz_Plugin_Admin extends Wiz_Plugin_Abstract {
                 ->saveRelations();
 
             echo "Created new user '$login' with password '$password'.".PHP_EOL;
-            return TRUE;
         }
         catch (Exception $e) {
-            echo 'Unable to create user: ' . $e->getMessage() . PHP_EOL;
-            return FALSE;
+            throw $e;
         }
     }
 }

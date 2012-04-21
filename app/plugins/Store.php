@@ -37,6 +37,5 @@ class Wiz_Plugin_Store extends Wiz_Plugin_Abstract {
             );
         }
         echo Wiz::tableOutput($rows);
-        return TRUE;
     }
 }

@@ -135,7 +135,6 @@ Class Wiz_Plugin_Log extends Wiz_Plugin_Abstract {
         );
 
         echo Wiz::tableOutput($rowData);
-        return TRUE;
     }
 
     /**
@@ -150,6 +149,5 @@ Class Wiz_Plugin_Log extends Wiz_Plugin_Abstract {
         $this->_getLog()->clean();
         $savedDays = Mage::getStoreConfig(Mage_Log_Model_Log::XML_LOG_CLEAN_DAYS);
         echo "Log cleaned. Log days saved: $savedDays".PHP_EOL;
-        return TRUE;
     }
 }

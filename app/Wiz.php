@@ -174,7 +174,6 @@ class Wiz {
 
     public function versionAction() {
         echo 'Version: '.Wiz::WIZ_VERSION;
-        return TRUE;
     }
 
     public function updateAction() {
@@ -236,7 +235,6 @@ class Wiz {
         }
 
         // Check the remote service to see what the latest version of Wiz is.
-        return TRUE;
     }
 
     private function rrmdir($dir) { 
@@ -248,7 +246,7 @@ class Wiz {
                 } 
             } 
             reset($objects); 
-            rmdir($dir); 
+            rmdir($dir);
         } 
     }
 
@@ -321,7 +319,6 @@ class Wiz {
         else {
             echo "Unknown command: $command".PHP_EOL;
         }
-        return TRUE;
     }
 
     /**
@@ -335,7 +332,6 @@ class Wiz {
         foreach ($this->_availableCommands as $commandName => $commandArray) {
             echo $commandName.PHP_EOL;
         }
-        return TRUE;
     }
 
     function _initWiz() {
@@ -357,8 +353,11 @@ class Wiz {
             else {
                 $pluginInstance = new $this->_availableCommands[$command]['class']();
             }
-            if (!$pluginInstance->{$this->_availableCommands[$command]['method']}($argv)) {
-                echo 'An error occured while processing the command: '.$command.PHP_EOL;
+            try {
+                $pluginInstance->{$this->_availableCommands[$command]['method']}($argv);
+            } catch(Exception $e) {
+                echo 'An error occured while processing the command: ' . $command . PHP_EOL;
+                echo $e->getMessage() . PHP_EOL;
             }
         }
         elseif ($command == '') {

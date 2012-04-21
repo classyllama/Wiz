@@ -59,4 +59,56 @@ Class Wiz_Plugin_Magento extends Wiz_Plugin_Abstract {
             include $path;
         }
     }
+
+    /**
+     * Shuts down Magento by creating the Maintenance flag.
+     *
+     * @author Nicholas Vahalik <nick@classyllama.com>
+     */
+    function shutdownAction() {        
+        if (($magentoRoot = Wiz::getMagentoRoot()) === FALSE) {
+            throw new Exception('Unable to find Magento.');
+        }
+
+        $maintenanceFile = $magentoRoot . WIZ_DS . 'maintenance.flag';
+
+        if (file_exists($maintenanceFile)) {
+            echo 'Maintenance file already exists.' . PHP_EOL;
+            return;
+        }
+
+        if (!is_writable($magentoRoot)) {
+            throw new Exception('Cannot create maintenance flag file.  Is the directory writable?');
+        }
+
+        touch($maintenanceFile);
+
+        echo 'Magento maintenance flag has been created.' . PHP_EOL;
+    }
+
+    /**
+     * Removes the maintenance flag, allowing Magento to run.
+     *
+     * @author Nicholas Vahalik <nick@classyllama.com>
+     */
+    function startAction() {        
+        if (($magentoRoot = Wiz::getMagentoRoot()) === FALSE) {
+            throw new Exception('Unable to find Magento.');
+        }
+
+        $maintenanceFile = $magentoRoot . WIZ_DS . 'maintenance.flag';
+
+        if (!file_exists($maintenanceFile)) {
+            echo 'Maintenance file does not exist.' . PHP_EOL;
+            return;
+        }
+
+        if (!is_writable($maintenanceFile)) {
+            throw new Exception('Cannot remove maintenance flag file.  Is the directory writable?');
+        }
+
+        unlink($maintenanceFile);
+
+        echo 'Magento maintenance flag has been removed.' . PHP_EOL;
+    }
 }

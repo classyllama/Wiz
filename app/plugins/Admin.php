@@ -106,6 +106,30 @@ Class Wiz_Plugin_Admin extends Wiz_Plugin_Abstract {
     }
 
     /**
+     * Lists the backend users in Magento.
+     *
+     * @author Nicholas Vahalik <nick@classyllama.com>
+     */
+    function listAction() {
+        $output = array();
+
+        Wiz::getMagento();
+
+        $userCollection = Mage::getModel('admin/user')->getCollection();
+
+        foreach ($userCollection as $user) {
+            var_dump($user->debug());
+            $output[] = array(
+                'Id' => $user->getId(),
+                'Username' => $user->getUsername(),
+                'Email' => $user->getEmail(),
+                'Status' => $user->getIsActive() ? 'Active' : 'Inactive',
+            );
+        }
+        echo Wiz::tableOutput($output);
+    }
+
+    /**
      * Resets an admin user's password.  If you do not pass the parameters,
      * you will be prompted for them.
      * 

@@ -35,6 +35,19 @@ class Wiz_Plugin_Devel extends Wiz_Plugin_Abstract {
      * @author Nicholas Vahalik <nick@classyllama.com>
      **/
     public function showhintsAction($options) {
+        /* 
+         * Per #7, if client restrictions are enabled, template hints won't work.
+         * I'm not sure if it is a good idea to simply just disable the restrictions,
+         * but we could alert the poor soul that they are set.
+         */
+
+        Wiz::getMagento();
+        $value = Mage::getStoreConfig('dev/restrict/allow_ips');
+
+        if ($value != NULL) {
+            echo 'Developer restrictions are enabled.  This value has no effect.' . PHP_EOL;
+        }
+
         $this->toggleConfigValue($options, array('dev/debug/template_hints', 'dev/debug/template_hints_blocks'));
     }
 

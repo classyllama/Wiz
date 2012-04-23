@@ -61,20 +61,39 @@ class Wiz_Plugin_Config extends Wiz_Plugin_Abstract {
      * 
      * Example: config-storget sales_email/order/enabled
      * This will return the value in the configuration if the order e-mails are enabled.
+     * 
+     * Options:
+     *   --all         Returns the value for all stores in the Magento installation.
      *
      * @param Node path string.
      * @author Nicholas Vahalik <nick@classyllama.com>
      */
     public function storegetAction($options) {
-        $store = 'default';
-        if (count($options) > 1) {
-            $store = array_shift($options);
-        }
-        $path = array_shift($options);
-        
+
+        $stores = $output = array();
+
         Wiz::getMagento();
 
-        echo "($store) $path" . ' = ' . Mage::getStoreConfig($path);// Wiz::getMagento()->
+        if (Wiz::getWiz()->getArg('all')) {
+            $storeCollection = Mage::getModel('core/store')->getCollection();
+            foreach ($storeCollection as $store) {
+                $stores[] = $store->getCode();
+            }
+        }
+        elseif (count($options) > 1) {
+            $stores = array(array_shift($options));
+        }
+        else {
+            $stores = array('default');            
+        }
+
+        $path = array_shift($options);
+
+        foreach ($stores as $store) {
+            $output[] = array('Store Id' => $store, $path => Mage::getStoreConfig($path, $store));
+            // echo "($store) $path" . ' = ' . Mage::getStoreConfig($path, $store);// Wiz::getMagento()->
+        }
+        echo Wiz::tableOutput($output);
         echo PHP_EOL;
     }
 

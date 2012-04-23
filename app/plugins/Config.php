@@ -142,7 +142,9 @@ class Wiz_Plugin_Config extends Wiz_Plugin_Abstract {
     /**
      * Returns the entire Magento config as nicely formatted XML to stdout.
      * Options:
-     *  --ugly (optional) - Makes the output ugly (no tabs or newlines)
+     *   --ugly (optional)   Makes the output ugly (no tabs or newlines)
+     * 
+     *   --system            Returns the modules configuration (system.xml)
      * 
      * @return The Magento Configuration as as nicely printed XML File.
      * @author Nicholas Vahalik <nick@classyllama.com>

@@ -21,8 +21,9 @@
 class Wiz_Plugin_Module extends Wiz_Plugin_Abstract {
 
     /**
-     * Lists all of the modules that are currently installed on the Magento installation
-     * and what their active flag is.
+     * Lists all of the modules that are currently installed on the Magento installation, 
+     * the version in their xml file, the version of the setup resource in the database,
+     * their code pool, and what their active flag is.
      *
      * @author Nicholas Vahalik <nick@classyllama.com>
      */
@@ -31,12 +32,24 @@ class Wiz_Plugin_Module extends Wiz_Plugin_Abstract {
         $modules = (array)Mage::getConfig()->getNode('modules')->children();
         $moduleList = array();
 
+        $connection  = Mage::getSingleton('core/resource')->getConnection('core_read');
+        $select = $connection->select()->from($coreResource->getTableName('core/resource'), array('code' , 'version'));
+
+        $result = $connection->fetchPairs($select);
+
+        foreach(Mage::getConfig()->getNode('global/resources')->children() as $resourceData) {
+            $resourceMappings[(string)$resourceData->setup->module] = $resourceData->getName();
+        }
+        
+        var_dump($mappings);
+
         foreach ($modules as $moduleName => $moduleData) {
             $flag = strtolower(Mage::getConfig()->getNode('advanced/modules_disable_output/' . $moduleName, 'default'));
 
             $moduleList[] = array(
                 'Module Name' => $moduleName,
-                'Version' => (string)$moduleData->version,
+                'Version (xml)' => (string)$moduleData->version,
+                'Version (db)' => $resourceMappings[$moduleName] != '' ? (string)$result[$resourceMappings[$moduleName]] : 'n/a',
                 'Active' => $moduleData->active ? 'Active' : 'Disabled',
                 'Output' => !empty($flag) && 'false' !== $flag ? 'Disabled' : 'Enabled',
                 'Code Pool' => $moduleData->codePool,

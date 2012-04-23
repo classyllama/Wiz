@@ -12,6 +12,7 @@ if [ "" == "$WIZ_PHP_PATH" ]; then
             VALID_VERSION=`$p/php -r "echo (int) version_compare(PHP_VERSION, '$WIZ_REQUIRED_PHP_VERSION', '>=');"`
             if [ "1" == "$VALID_VERSION" ]; then
                 WIZ_PHP_PATH="$p/php";
+                break;
             fi
         fi;
     done

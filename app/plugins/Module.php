@@ -32,6 +32,7 @@ class Wiz_Plugin_Module extends Wiz_Plugin_Abstract {
         $modules = (array)Mage::getConfig()->getNode('modules')->children();
         $moduleList = array();
 
+        $coreResource = Mage::getSingleton('core/resource');
         $connection  = Mage::getSingleton('core/resource')->getConnection('core_read');
         $select = $connection->select()->from($coreResource->getTableName('core/resource'), array('code' , 'version'));
 

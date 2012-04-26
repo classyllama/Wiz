@@ -118,7 +118,6 @@ Class Wiz_Plugin_Admin extends Wiz_Plugin_Abstract {
         $userCollection = Mage::getModel('admin/user')->getCollection();
 
         foreach ($userCollection as $user) {
-            var_dump($user->debug());
             $output[] = array(
                 'Id' => $user->getId(),
                 'Username' => $user->getUsername(),

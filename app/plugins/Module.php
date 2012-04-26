@@ -41,8 +41,6 @@ class Wiz_Plugin_Module extends Wiz_Plugin_Abstract {
         foreach(Mage::getConfig()->getNode('global/resources')->children() as $resourceData) {
             $resourceMappings[(string)$resourceData->setup->module] = $resourceData->getName();
         }
-        
-        var_dump($mappings);
 
         foreach ($modules as $moduleName => $moduleData) {
             $flag = strtolower(Mage::getConfig()->getNode('advanced/modules_disable_output/' . $moduleName, 'default'));

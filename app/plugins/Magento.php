@@ -124,7 +124,7 @@ Class Wiz_Plugin_Magento extends Wiz_Plugin_Abstract {
     		
     		$output[] = array(
     				'Code Profiler' => $name,
-    				'Time' => "$number_format($sum)",
+    				'Time' => $sum,
     				'Cnt' => (string) $count,
     				'Emalloc' => (string) number_format($emalloc),
     				'RealMem' => (string) number_format($realmem),

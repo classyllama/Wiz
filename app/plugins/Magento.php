@@ -41,6 +41,8 @@ Class Wiz_Plugin_Magento extends Wiz_Plugin_Abstract {
      * You can optionally specify the store under which to execute the script by passing
      * --store <storecode>.
      * 
+     * You can optionally specify to display Varien_Profiler data by passing --profile.
+     * 
      * @param filename
      * @author Nicholas Vahalik <nick@classyllama.com>
      */
@@ -56,7 +58,22 @@ Class Wiz_Plugin_Magento extends Wiz_Plugin_Abstract {
         else {
             $path = realpath($options[0]);
             Wiz::getMagento();
+            
+            // We have to check the settings AFTER we bootstrap Magento so that we can use the Mage class.
+            if (Wiz::getWiz()->getArg('profile')) {
+            	if (!Mage::getStoreConfig('dev/debug/profiler')	|| !Mage::helper('core')->isDevAllowed()) {
+            		echo 'Please turn on the Varien_Profiler by executing the "devel-profiler yes" command'.PHP_EOL;;
+            		return FALSE;
+            	} else {
+            		$profiling = true;
+            	}
+            }
+            
             include $path;
+            
+            if ($profiling) {
+            	$this->_flushProfileData();
+            }
         }
     }
 
@@ -85,7 +102,39 @@ Class Wiz_Plugin_Magento extends Wiz_Plugin_Abstract {
 
         echo 'Magento maintenance flag has been created.' . PHP_EOL;
     }
-
+    
+    /**
+     * Displays the Varien_Profiler data to the screen.  If it is not enabled, it will 
+     * indicate that it is disabled.
+     * 
+     * @author Ben Robie <brobie@gmail.com>
+     **/
+    function _flushProfileData(){
+    	
+    	$timers = Varien_Profiler::getTimers();
+    	
+    	foreach ($timers as $name=>$timer) {
+    		$sum = Varien_Profiler::fetch($name,'sum');
+    		$count = Varien_Profiler::fetch($name,'count');
+    		$realmem = Varien_Profiler::fetch($name,'realmem');
+    		$emalloc = Varien_Profiler::fetch($name,'emalloc');
+    		if ($sum<.0010 && $count<10 && $emalloc<10000) {
+    			continue;
+    		}
+    		
+    		$output[] = array(
+    				'Code Profiler' => $name,
+    				'Time' => $sum,
+    				'Cnt' => (string) $count,
+    				'Emalloc' => (string) number_format($emalloc),
+    				'RealMem' => (string) number_format($realmem),
+    		);
+    		
+    		
+    	}
+    	echo Wiz::tableOutput($output);
+    }
+    
     /**
      * Removes the maintenance flag, allowing Magento to run.
      *

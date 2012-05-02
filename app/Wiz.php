@@ -35,7 +35,7 @@ define('WIZ_DS', DIRECTORY_SEPARATOR);
  */
 class Wiz {
 
-    const WIZ_VERSION = '0.9.6';
+    const WIZ_VERSION = '0.9.7';
 
     static private $config;
 
@@ -355,8 +355,13 @@ class Wiz {
     public function run() {
         $argv = $_SERVER['argv'];
 
-        array_shift($argv);
+        // The first item is us.  We don't need it.
+        // array_shift($argv);
+
+        // Next item is the command        
         $command = array_shift($argv);
+
+        // Attempt to run the command.
         if (array_key_exists($command, $this->_availableCommands)) {
             if ($this->_availableCommands[$command]['class'] == __CLASS__) {
                 $pluginInstance = $this;
@@ -375,7 +380,7 @@ class Wiz {
             echo $this->getHelp();
         }
         else {
-            echo 'Unable to find that command: '.$command.PHP_EOL;
+            echo 'Unable to find that command: ' . $command . PHP_EOL;
         }
     }
 
@@ -415,11 +420,7 @@ class Wiz {
         $helpText .= '                Executes Magento as this particular store or website.';
         $helpText .= PHP_EOL;
         $helpText .= PHP_EOL;
-        // $helpText .= 'Available commands:'.PHP_EOL;
-        // foreach ($this->_availableCommands as $commandName => $commandArray) {
-        //     $helpText .= '  '.$commandName.PHP_EOL;
-        // }
-        return $helpText.PHP_EOL;
+        return $helpText . PHP_EOL;
     }
 
     public static function inspect() {
@@ -428,25 +429,42 @@ class Wiz {
     }
 
     /**
-     * Parse input arguments
+     * Parse input arguments, removing them as we find them.
      *
      * @return Wiz_Plugin_Abstract
      */
     protected function _parseArgs() {
-        $current = null;
-        foreach ($_SERVER['argv'] as $arg) {
+        $current = $commandStart = $inCommand = false;
+        $commandEnd = 1;
+
+        foreach ($_SERVER['argv'] as $position => $arg) {
+
+            if ($commandStart === FALSE && array_key_exists($arg, $this->_availableCommands)) {
+                $commandStart = $position;
+                $inCommand = TRUE;
+            }
+
             $match = array();
             if (preg_match('#^--([\w\d_-]{1,})$#', $arg, $match) || preg_match('#^-([\w\d_]{1,})$#', $arg, $match)) {
+                $inCommand = false;
                 $current = $match[1];
                 $this->_args[$current] = true;
             } else {
                 if ($current) {
                     $this->_args[$current] = $arg;
-                } else if (preg_match('#^([\w\d_]{1,})$#', $arg, $match)) {
+                } else if (!$inCommand && preg_match('#^([\w\d_]{1,})$#', $arg, $match)) {
                     $this->_args[$match[1]] = true;
+                } else {
+                    if ($inCommand && $commandStart != $position) {
+                        $commandEnd++;
+                    }
                 }
             }
         }
+        $_SERVER['argv'] = array_slice($_SERVER['argv'], $commandStart, $commandEnd);
+        // var_dump($commandStart, $commandEnd);
+        // var_dump($_SERVER['argv']);
+        // var_dump($this->_args);
         return $this;
     }
 

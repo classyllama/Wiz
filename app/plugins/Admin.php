@@ -288,4 +288,63 @@ Class Wiz_Plugin_Admin extends Wiz_Plugin_Abstract {
             throw $e;
         }
     }
+
+    /**
+     * Sets or displays the admin session timeout value.
+     * 
+     * Usage:
+     *   wiz admin-timeout <time-value>
+     * 
+     * If <time-value> is not provided, it displays the value fof the admin session
+     * timeout.  Otherwise, it sets the admin session timeout value to the provided
+     * value.  Possible values:
+     * 
+     * <int>s - Sets the timeout to be the value.  Default if no multiplier is 
+     *          specified.
+     * <int>m  - Sets the timeout to be the number of minutes specified. (e.g. 30m)
+     * <int>h  - Sets the timeout to be the number of hours specified. (e.g. 8h)
+     * <int>d  - Sets the timeout to be the number of days specified. (e.g. 2d)
+     *
+     * @author Nicholas Vahalik <nick@classyllama.com>
+     */
+    public function timeoutAction($options) {
+        $time = array_pop($options);
+        Wiz::getMagento();
+
+        if ($time != '') {
+            // Common multipliers.
+            $multiplier = array('s' => 1, 'm' => 60, 'h' => 3600, 'd' => 86400);
+
+            // Grab the components of the time.
+            preg_match('#(\d+)(m|h|d)?#i', $time, $matches);
+
+            $mult  = $matches[2] != '' ? $matches[2] : 's';
+            $value = $matches[1] != '' ? $matches[1] : 0;
+
+            // If we got passed some weird multiplier, bail out.
+            if (!array_key_exists($mult, $multiplier)) {
+                throw new Exception("Invalid time specifier: '$mult'.");
+            }
+
+            $timeInSeconds = (int)$value * $multiplier[$mult];
+
+            // Kick back anything that is less than 60 seconds, since the admin would.
+            if ($timeInSeconds < 60) {
+                throw new Exception('Values less than 60 seconds are ignored.');
+            } 
+
+            // Save our value and then remove the cache.
+            Mage::getConfig()->saveConfig('admin/security/session_cookie_lifetime', $timeInSeconds);
+            Mage::getConfig()->removeCache();
+
+            // We do this here because below doesn't run correctly until the next config load.
+            $output = array(array('Config Value' => 'admin/security/session_cookie_lifetime', 'Value' => $timeInSeconds));
+        }
+        else {
+            // Give 'em the value.
+            $output = array(array('Config Value' => 'admin/security/session_cookie_lifetime', 'Value' => (int)Mage::getStoreConfig('admin/security/session_cookie_lifetime')));
+        }
+
+        echo Wiz::tableOutput($output);
+    }
 }

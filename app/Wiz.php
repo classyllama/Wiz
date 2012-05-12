@@ -355,10 +355,12 @@ class Wiz {
     public function run() {
         $argv = $_SERVER['argv'];
 
-        // The first item is us.  We don't need it.
-        // array_shift($argv);
+        // If the first item is us.  We don't need it.
+        if (count($argv) == 1 && $argv[0] == dirname(dirname(__FILE__)) . WIZ_DS . 'wiz.php') {
+            array_shift($argv);
+        }
 
-        // Next item is the command        
+        // Next item is the command
         $command = array_shift($argv);
 
         // Attempt to run the command.

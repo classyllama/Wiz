@@ -477,16 +477,16 @@ class Wiz {
     }
 
     /**
-     * Retrieve argument value by name or false
+     * Retrieve argument value by name or the default specified
      *
      * @param string $name the argument name
      * @return mixed
      */
-    public function getArg($name) {
+    public function getArg($name, $default = false) {
         if (isset($this->_args[$name])) {
             return $this->_args[$name];
         }
-        return false;
+        return $default;
     }
 
     /**

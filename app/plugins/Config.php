@@ -8,7 +8,7 @@
  * http://opensource.org/licenses/osl-3.0.php
  *
  * DISCLAIMER
- * 
+ *
  * This program is provided to you AS-IS.  There is no warranty.  It has not been
  * certified for any particular purpose.
  *
@@ -58,10 +58,10 @@ class Wiz_Plugin_Config extends Wiz_Plugin_Abstract {
 
     /**
      * Retrieve a single store configuration node path.
-     * 
+     *
      * Example: config-storget sales_email/order/enabled
      * This will return the value in the configuration if the order e-mails are enabled.
-     * 
+     *
      * Options:
      *   --all         Returns the value for all stores in the Magento installation.
      *
@@ -84,7 +84,7 @@ class Wiz_Plugin_Config extends Wiz_Plugin_Abstract {
             $stores = array(array_shift($options));
         }
         else {
-            $stores = array('default');            
+            $stores = array('default');
         }
 
         $path = array_shift($options);
@@ -143,9 +143,12 @@ class Wiz_Plugin_Config extends Wiz_Plugin_Abstract {
      * Returns the entire Magento config as nicely formatted XML to stdout.
      * Options:
      *   --ugly (optional)   Makes the output ugly (no tabs or newlines)
-     * 
+     *
      *   --system            Returns the modules configuration (system.xml)
-     * 
+     *
+     *   --indent <int>      Number of spaces to use to indent the XML.  The
+     *                       default is 3.
+     *
      * @return The Magento Configuration as as nicely printed XML File.
      * @author Nicholas Vahalik <nick@classyllama.com>
      */
@@ -158,8 +161,32 @@ class Wiz_Plugin_Config extends Wiz_Plugin_Abstract {
         else {
             $xml = Mage::getConfig();
         }
-        echo $xml->getNode()->asNiceXml('', Wiz::getWiz()->getArg('ugly'));
+
+        if (!Wiz::getWiz()->getArg('ugly')) {
+            $output = $xml->getNode()->asNiceXml('');
+
+            // Update with our indentation if so desired.
+            if (Wiz::getWiz()->getArg('indent') !== false) {
+                $output = preg_replace_callback('#^(\s+)#m', array($this, '_replaceSpaces'), $output);
+            }
+        }
+        else {
+            $output = $xml->getNode()->asXml();
+        }
+
+        echo $output;
         echo PHP_EOL;
     }
-}
 
+    /**
+     * Replace the standard 3 spaces asXml products with whatever we want.
+     *
+     * @param string $matches
+     * @return void
+     * @author Nicholas Vahalik <nick@classyllama.com>
+     */
+    protected function _replaceSpaces($matches) {
+        $newSpaces = (int)Wiz::getWiz()->getArg('indent');
+        return str_repeat(' ', (strlen($matches[1]) / 3) * $newSpaces);
+    }
+}

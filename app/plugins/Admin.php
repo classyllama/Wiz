@@ -347,4 +347,50 @@ Class Wiz_Plugin_Admin extends Wiz_Plugin_Abstract {
 
         echo Wiz::tableOutput($output);
     }
+
+    public function _recurseXmlWalkResources($item, $path = '', $all = false) {
+        $results = array();
+
+        foreach ($item->children() as $itemName => $child) {
+            if ('children' == $itemName) {
+                $results = array_merge($results, $this->_recurseXmlWalkResources($child, $path, $all));
+            }
+            else if ('title' == $itemName && $path != '') {
+                $results[] = array($path, (string)$child);
+            }
+            else {
+                $results = array_merge($results, $this->_recurseXmlWalkResources($child, $path . ($path != '' ? '/' : '') . (string)$itemName, $all));
+            }
+        }
+        return $results;
+    }
+
+    public function _sortAclEntries($a, $b) {
+        return strcmp($a['Path'], $b['Path']);
+    }
+
+
+    /**
+     * Displays a full list of resources that are defined by modules in Magento.
+     *
+     * @param string $options 
+     * @return void
+     * @author Nicholas Vahalik <nick@classyllama.com>
+     */
+    public function resourcesAction($options) {
+        $formattedOutput = $output = array();
+
+        Wiz::getMagento();
+        $aclResources = Mage::getModel('admin/config')->getAdminhtmlConfig()->getNode("acl/resources");
+        $output = $this->_recurseXmlWalkResources($aclResources->admin);
+
+        foreach ($output as $data) {
+            $formattedOutput[] = array('Path' => $data[0], 'Title' => $data[1]);
+        }
+
+        usort($formattedOutput, array($this, '_sortAclEntries'));
+
+        echo Wiz::tableOutput($formattedOutput);
+    }
+
 }

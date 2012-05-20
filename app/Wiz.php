@@ -14,11 +14,9 @@
  *
  * @package    Wiz
  * @author     Nick Vahalik <nick@classyllama.com>
- * @copyright  Copyright (c) 2011 Classy Llama Studios
+ * @copyright  Copyright (c) 2012 Classy Llama Studios, LLC
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
-
-// For now, let's eschew extensive command line params in favor of environment variables.
 
 ini_set('date.timezone', 'America/Chicago');
 error_reporting(-1);
@@ -35,7 +33,7 @@ define('WIZ_DS', DIRECTORY_SEPARATOR);
  */
 class Wiz {
 
-    const WIZ_VERSION = '0.9.7';
+    const WIZ_VERSION = '0.9.8';
 
     static private $config;
 

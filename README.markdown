@@ -30,7 +30,7 @@ To enable bash shell command/TAB completion, put/append the following in `~/.bas
 
 (replace `$WIZ_HOME` above with the folder location where you extracted Wiz)
 
-Now you can type: wiz <press TAB> to get a list of commands.
+Now you can type: `wiz <TAB>` to get a list of commands.  Futher
 
 ## Magento Scope Code
 
@@ -38,9 +38,9 @@ By default, Wiz runs inside of the <code>admin</code> scope. This is great for m
 
 You can specify the scope Wiz initializes Magento with by specifying the following options:
 
-<code>--store [id|code]</code>
+<code>\--store [id|code]</code>
 
-<code>--website [id|code]</code>
+<code>\--website [id|code]</code>
 
 By leaving off the id or scope, Wiz will use the default store or website (passing in a blank code).
 
@@ -48,23 +48,23 @@ By leaving off the id or scope, Wiz will use the default store or website (passi
 
 Wiz now supports the ability to change the table output for batch handling:
 
-<code>--batch [csv|pipe|tab]</code>
+<code>\--batch [csv|pipe|tab]</code>
 
 If passed without a parameter, csv is the default.  Examples:
 
-<code>$ wiz devel-config --batch<br/>
+<code>$ wiz devel-config \--batch<br/>
 Path,Value<br/>
 dev/debug/profiler,No<br/>
 dev/js/merge\_files,No<br/>
 .../code>
 
-<code>$ wiz devel-config --batch pipe<br/>
+<code>$ wiz devel-config \--batch pipe<br/>
 Path|Value<br/>
 dev/debug/profiler|No<br/>
 dev/js/merge_files|No<br/>
 ...</code>
 
-<code>$ wiz devel-config --batch tab<br/>
+<code>$ wiz devel-config \--batch tab<br/>
 Path	Value<br/>
 dev/debug/profiler	No<br/>
 dev/js/merge_files	No<br/>
@@ -92,9 +92,29 @@ Generates .htaccess compatible 301 redirects.  Takes a path to a CSV file as par
 
 Takes an XML Sitemap and converts it to CSV.  _This functionality is not quite finished yet._
 
-### admin-createadmin
+### admin-createadmin  &lt;username&gt; &lt;firstname> &lt;lastname> &lt;email> &lt;password>
 
-Creates an Administrative user in the backend.  Has been tested in both CE and PE.
+Creates an Administrative user in the backend.  Has been tested in both CE, PE, and EE.  If you don't pass the argument, you will be promtped for them.
+
+### admin-disable &lt;username>
+
+Disables an administrative user.
+
+### admin-enable &lt;username>
+
+Enables an administrative user.
+
+### admin-list
+
+Lists the name, e-mail address, and status of every admin in the system.
+
+### admin-resetpass
+
+Resets the password of an admin user.
+
+### admin-timeout <time>
+
+Set the cookie lifetime for admin sessions. 
 
 ### cache-clear [all|invalidated|system|js|css|jscss|images]
 
@@ -128,9 +148,21 @@ Gets a configuration value from the global Magento config.
 
 Runs an XPath query over Magento's configuration object.  For more information on what XPath can do, go check out this [W3School Article on XPath](http://www.w3schools.com/xpath/xpath_syntax.asp).
 
-### config-asxml [--ugly]
+### config-asxml [\--ugly]
 
 Dumps Magento's config as XML.  The default is pretty output, but you can pass the ugly parameter to get no newlines or tabs.
+
+### cron-jobs
+
+Lists the jobs that are defined to run when the default cron job is execute.  An interesting point here: the jobs that are defined and listed here do not actually run when the cron event gets dispatched from cron.php.  At least… not directly.  Those jobs are actually managed and executed by the default cron listener (which is provided by Mage_Cron).
+
+### cron-listeners
+
+Lists the event listners that fire when the cron executes.
+
+### cron-run
+
+Runs the cron by firing off the default cron event.
 
 ### devel-showhints [true|false|yes|no|1|0|totally|nah]
 
@@ -202,6 +234,22 @@ Display's Magento's version.
 
 Runs a PHP Script after bootstrapping Magento.  Useful for testing code or writing scripts that need to run inside of Magento without having to write a full-fledged module or a sandbox.
 
+### magento-shutdown
+
+Shuts down Magento by creating the maintenance flag file.
+
+### magento-startup
+
+Allows Magento run by removing the maintenance flag file.
+
+### mc-dl
+
+Downloads a Magento connect package.  Yes, I know you can use ./mage but this also works.
+
+### mc-versions
+
+Lists the available versions of a module that you can download from Magento Connect.
+
 ### module-list
 
 Displays a list of all modules on the system.  Shows module name, version, active, output, and code pool.
@@ -244,6 +292,10 @@ Launches a MySQL command line session directly to Magento's database.
 ### sql-exec &lt;query&gt;
 
 Executes a query against the Magento database.
+
+### store-list
+
+Shows a list of stores, groups, and websites.  Like a boss.
 
 ### command-list
 

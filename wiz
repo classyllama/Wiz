@@ -1,30 +1,32 @@
 #!/bin/bash
 
-WIZ_SCRIPT_PATH=`dirname $_`
-WIZ_REQUIRED_PHP_VERSION="5.2"
-WIZ_FOUND_PHP=0
+WIZ_PATH="$0";
+if [[ -L "$WIZ_PATH" ]]; then
+	WIZ_PATH="`readlink -n $WIZ_PATH`";
+fi
 
-if [ "" == "$WIZ_PHP_PATH" ]; then
+WIZ_DIR="`dirname $WIZ_PATH`";
+WIZ_PHP_VERSION="5.2";
+
+# If no valid PHP executable has been set in WIZ_PHP_PATH, iterate PATH looking for one
+if [ ! -x "$WIZ_PHP_PATH" ] || [ "`$WIZ_PHP_PATH -r "echo (int) version_compare(PHP_VERSION, '$WIZ_PHP_VERSION', '>=');"`" == "0" ]; then
     IFS=:
-    for p in $PATH; do
-        if [ -x "$p/php" ]; then
-            WIZ_FOUND_PHP=1
-            VALID_VERSION=`$p/php -r "echo (int) version_compare(PHP_VERSION, '$WIZ_REQUIRED_PHP_VERSION', '>=');"`
-            if [ "1" == "$VALID_VERSION" ]; then
-                WIZ_PHP_PATH="$p/php";
-                break;
+    for i in $PATH; do
+        if [ -x "$i/php" ]; then
+            WIZ_PHP_VALID=`$i/php -r "echo (int) version_compare(PHP_VERSION, '$WIZ_PHP_VERSION', '>=');"`
+            if [ "$WIZ_PHP_VALID" == "1" ]; then
+                WIZ_PHP_PATH="$i/php"
+				break;
             fi
-        fi;
+        fi
     done
 fi
 
-if [ "1" == "$WIZ_FOUND_PHP" -a -z "$WIZ_PHP_PATH" ]; then
-    echo "Found a PHP executable, but it's not a version >= $WIZ_REQUIRED_PHP_VERSION.  You can specify one by setting WIZ_PHP_PATH.";
-    exit;
-elif [ -z "$WIZ_PHP_PATH" ]; then
-    echo "Unable to find a PHP >= $WIZ_REQUIRED_PHP_VERSION executable.  You can specify one by setting WIZ_PHP_PATH.";
-    exit;
+# Validate that we have a valid executable file on our hands and that one has been found.
+if [ ! -x "$WIZ_PHP_PATH" ]; then
+	echo "ERROR: Could not find a PHP executable >= $WIZ_PHP_VERSION. Please set WIZ_PHP_PATH to a valid PHP executable binary and try again."
+	exit;
 fi
 
-$WIZ_PHP_PATH -f $WIZ_SCRIPT_PATH/wiz.php -- $@
-
+# Begin tool execution
+$WIZ_PHP_PATH -f "$WIZ_DIR/wiz.php" $@

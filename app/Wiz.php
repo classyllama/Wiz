@@ -488,6 +488,30 @@ class Wiz {
     }
 
     /**
+     * get the website code
+     *
+     * @return string
+     * @author Kevin Kirchner
+     **/
+    public function getWebsiteCode()
+    {
+        $wiz = Wiz::getWiz();
+        return $wiz->getArg('website') ? $wiz->getArg('website') : Mage::app()->getWebsite()->getCode();
+    }
+
+    /**
+     * get the website code
+     *
+     * @return string
+     * @author Kevin Kirchner
+     **/
+    public function getStoreCode()
+    {
+        $wiz = Wiz::getWiz();
+        return $wiz->getArg('store') ? $wiz->getArg('store') : Mage::app()->getStore()->getCode();
+    }
+
+    /**
      * Modified version of the code at the site below:
      * @see http://www.pyrosoft.co.uk/blog/2007/07/01/php-array-to-text-table-function/
      */

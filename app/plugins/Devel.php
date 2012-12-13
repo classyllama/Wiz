@@ -48,7 +48,15 @@ class Wiz_Plugin_Devel extends Wiz_Plugin_Abstract {
             echo 'Developer restrictions are enabled.  This value has no effect.' . PHP_EOL;
         }
 
-        $this->toggleConfigValue($options, array('dev/debug/template_hints', 'dev/debug/template_hints_blocks'));
+        $path = 'dev/debug/template_hints';
+        $storeCode = Wiz::getStoreCode();
+        $websiteCode = Wiz::getWebsiteCode();
+        
+        $scopeId = Mage::app()->getStore($storeCode)->getStoreId();
+        $this->toggleConfigValue($options, array('dev/debug/template_hints', 'dev/debug/template_hints_blocks'), 'stores', $scopeId);
+
+        $scopeId = Mage::app()->getWebsite($websiteCode)->getWebsiteId();
+        $this->toggleConfigValue($options, array('dev/debug/template_hints', 'dev/debug/template_hints_blocks'), 'websites', $scopeId);
     }
 
     /**
@@ -163,7 +171,7 @@ class Wiz_Plugin_Devel extends Wiz_Plugin_Abstract {
      * @param array|string Configuration path or paths as an array.
      * @author Nicholas Vahalik <nick@classyllama.com>
      */
-    private function toggleConfigValue($options, $values) {
+    private function toggleConfigValue($options, $values, $scope = 'default', $scopeId = 0) {
         if (!is_array($values)) {
             $values = array($values);
         }
@@ -188,7 +196,7 @@ class Wiz_Plugin_Devel extends Wiz_Plugin_Abstract {
 
         foreach ($values as $value) {
             if ($showValue !== NULL) {
-                Mage::getConfig()->saveConfig($value, $showValue);
+                Mage::getConfig()->saveConfig($value, $showValue, $scope, $scopeId);
             }
             else {
                 $output[] = array(

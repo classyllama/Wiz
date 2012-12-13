@@ -51,22 +51,12 @@ class Wiz_Plugin_Devel extends Wiz_Plugin_Abstract {
         $path = 'dev/debug/template_hints';
         $storeCode = Wiz::getStoreCode();
         $websiteCode = Wiz::getWebsiteCode();
+        
+        $scopeId = Mage::app()->getStore($storeCode)->getStoreId();
+        $this->toggleConfigValue($options, array('dev/debug/template_hints', 'dev/debug/template_hints_blocks'), 'stores', $scopeId);
 
-        if($storeValue >= 0) {
-            $scope = 'stores';
-            $scopeId = Mage::app()->getStore($storeCode)->getStoreId();
-            $this->toggleConfigValue($options, array('dev/debug/template_hints', 'dev/debug/template_hints_blocks'), $scope, $scopeId);
-        }
-        if($websiteValue >= 0) {
-            $scope = 'websites';
-            $scopeId = Mage::app()->getWebsite($websiteCode)->getWebsiteId();
-            $this->toggleConfigValue($options, array('dev/debug/template_hints', 'dev/debug/template_hints_blocks'), $scope, $scopeId);
-        }
-
-        $scope = 'default';
-        $scopeId = 0;
-
-        $this->toggleConfigValue($options, array('dev/debug/template_hints', 'dev/debug/template_hints_blocks'), $scope, $scopeId);
+        $scopeId = Mage::app()->getWebsite($websiteCode)->getWebsiteId();
+        $this->toggleConfigValue($options, array('dev/debug/template_hints', 'dev/debug/template_hints_blocks'), 'websites', $scopeId);
     }
 
     /**

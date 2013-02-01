@@ -40,7 +40,7 @@ Class Wiz_Plugin_Encrypt extends Wiz_Plugin_Abstract {
 			Mage::app()->cleanCache();
 			echo 'New Key: '. $newKey . "\n";
 		} else {
-			echo 'This version of Magento is not Enterprise';
+			echo 'This version of Magento is not Enterprise' . "\n";
 		}
     	
     }
@@ -66,7 +66,7 @@ Class Wiz_Plugin_Encrypt extends Wiz_Plugin_Abstract {
     		$changeEncryption->reEncryptDatabaseValues(false);
     
     	} else {
-    		echo 'This version of Magento is not Enterprise';
+    		echo 'This version of Magento is not Enterprise' . "\n";
     	}
     	 
     }

@@ -24,7 +24,6 @@
  * @author Ben Robie <brobie@gmail.com>
  */
 Class Wiz_Plugin_Encrypt extends Wiz_Plugin_Abstract {
-
   
     /**
      * Creates a new encryption key and returns it to the screen
@@ -35,14 +34,27 @@ Class Wiz_Plugin_Encrypt extends Wiz_Plugin_Abstract {
      */
     function resetKeyAction() {
 	 	Wiz::getMagento();
-		if (class_exists(Enterprise_Pci_Model_Resource_Key_Change)){
-			$newKey = Mage::getResourceSingleton('enterprise_pci/key_change')->changeEncryptionKey(null);
-			Mage::app()->cleanCache();
-			echo 'New Key: '. $newKey . "\n";
-		} else {
-			echo 'This version of Magento is not Enterprise' . "\n";
-		}
-    	
+
+	 	$file = Mage::getBaseDir('etc') . DS . 'local.xml';
+	 	if (!is_writeable($file)) {
+	 		throw new Exception('File %s is not writeable.', realpath($file));
+	 	}
+	 	$contents = file_get_contents($file);
+	 	if (null === $key) {
+	 		$key = md5(time());
+	 	}
+	 	$encryptor = clone Mage::helper('core')->getEncryptor();
+	 	$encryptor->setNewKey($key);
+	 	$contents = preg_replace('/<key><\!\[CDATA\[(.+?)\]\]><\/key>/s',
+	 			'<key><![CDATA[' . $encryptor->exportKeys() . ']]></key>', $contents
+	 	);
+	 	
+ 		file_put_contents($file, $contents);
+		
+	 	Mage::app()->cleanCache();
+		
+	 	echo 'New Key: '. $key . "\n";
+		
     }
     
     /**
@@ -63,6 +75,7 @@ Class Wiz_Plugin_Encrypt extends Wiz_Plugin_Abstract {
     		require 'enterprise/Enterprise.php';
     
     		$changeEncryption = new Encryption_Change($options);
+			$changeEncryption->echoConfigPaths();
     		$changeEncryption->reEncryptDatabaseValues(false);
     
     	} else {

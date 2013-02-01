@@ -41,6 +41,7 @@ class Encryption_Change extends Enterprise_Pci_Model_Resource_Key_Change {
 	 * @author Ben Robie <brobie@gmail.com>
 	 */
 	protected function _reEncryptCreditCardNumbers() {
+		$output = array();
 		
 		foreach($this->options as $index => $info) {
 			$tableInfo = explode('|', $info);
@@ -50,13 +51,33 @@ class Encryption_Change extends Enterprise_Pci_Model_Resource_Key_Change {
 					$tableInfo[2] ));
 			
 			$attributeValues = $this->_getWriteAdapter()->fetchPairs($select);
+			$counts = array();
+			$count = 0;
 			foreach($attributeValues as $valueId=>$value) {
 				if ($value){
+					$count++;
 					$this->_getWriteAdapter()->update($table, array(
 							$tableInfo[2] => $this->_encryptor->encrypt($this->_encryptor->decrypt($value)) ), array(
 							$tableInfo[1] . ' = ?' => (int) $valueId ));
 				}
 			}
+			$output[] = array('table' => $table, 'column'=> $tableInfo[2], 'count'=> $count);
 		}
+		echo Wiz::tableOutput($output);
+	}
+	
+	/**
+	 * Prints out all of the config paths that are marked as encrypted
+	 *
+	 * @author Ben Robie <brobie@gmail.com>
+	 */
+	public function echoConfigPaths(){
+		$output = array();
+		$paths = Mage::getSingleton('adminhtml/config')->getEncryptedNodeEntriesPaths();
+		foreach ($paths as $path){
+			$output[] = array('core_config_data path' => $path);
+		}
+		echo Wiz::tableOutput($output);
+		
 	}
 }

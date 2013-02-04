@@ -32,10 +32,10 @@ class Wiz_Plugin_MC extends Wiz_Plugin_Abstract {
    * @author Nicholas Vahalik <nick@classyllama.com>
    **/
   public function dlAction($options) {
+    $options = $this->_getFixedOptions($options);
     if (count($options) == 0) {
-      echo 'Please supply a Magento Connect 1.0 or 2.0 key.';
+      throw new Exception('Please supply a Magento Connect 1.0 or 2.0 key.');
     }
-
     $key = $options[0];
     $selectedVersion = 'latest';
     $selectedBranch = 'stable';
@@ -65,8 +65,9 @@ class Wiz_Plugin_MC extends Wiz_Plugin_Abstract {
    * @author Nicholas Vahalik <nick@classyllama.com>
    */
   public function versionsAction($options) {
+    $options = $this->_getFixedOptions($options);
     if (count($options) == 0) {
-      echo 'Please supply a Magento Connect 1.0 or 2.0 key.';
+      throw new Exception('Please supply a Magento Connect 1.0 or 2.0 key.');
     }
 
     $key = $options[0];
@@ -154,5 +155,19 @@ class Wiz_Plugin_MC extends Wiz_Plugin_Abstract {
           }
       }
       return 0;
+  }
+
+  private function _getFixedOptions($options){
+      if(
+        is_array($options) && 
+        isset($options[0]) && 
+        strpos($options[0], 'http') !== FALSE && 
+        isset($options[1]) &&
+        strpos($options[1], '//') !== FALSE
+        ){
+        return array(0=>$options[0] . ':' . $options[1]);
+      }else{
+        return $options;
+      }
   }
 }

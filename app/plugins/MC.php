@@ -34,7 +34,7 @@ class Wiz_Plugin_MC extends Wiz_Plugin_Abstract {
   public function dlAction($options) {
     $options = $this->_getFixedOptions($options);
     if (count($options) == 0) {
-      echo 'Please supply a Magento Connect 1.0 or 2.0 key.';
+      throw new Exception('Please supply a Magento Connect 1.0 or 2.0 key.');
     }
     $key = $options[0];
     $selectedVersion = 'latest';

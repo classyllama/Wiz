@@ -171,6 +171,8 @@ class Wiz {
             	Varien_Profiler::enable();
             }
             
+            Mage::reset();
+            
             $_magento = Mage::app($scopeCode, $scopeId);
         }
         return $_magento;

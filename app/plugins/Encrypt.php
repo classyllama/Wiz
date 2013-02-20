@@ -53,7 +53,7 @@ Class Wiz_Plugin_Encrypt extends Wiz_Plugin_Abstract {
 		
 	 	Mage::app()->cleanCache();
 		
-	 	echo 'New Key: '. $key . "\n";
+	 	echo "\nPlease refer to the application's local.xml file for your new key\n";
 		
     }
     
@@ -82,6 +82,45 @@ Class Wiz_Plugin_Encrypt extends Wiz_Plugin_Abstract {
     		echo 'This version of Magento is not Enterprise' . "\n";
     	}
     	 
+    }
+    
+    /**
+     * Encrypts the data keys with a master key file.
+     *
+     * Command: wiz encrypt-encryptDataKeys
+     *
+     * @author Ben Robie <brobie@gmail.com>
+     */
+    function encryptDataKeysAction($options) {
+    	Wiz::getMagento();
+    	if (class_exists(Cds_Pci_Model_Data_Encryption_Key)){
+			$keyEncryption = Mage::getModel('cds_pci/data_encryption_key');
+    		if ($keyEncryption){
+    			if ($options[0] == 'force'){
+    				$keyEncryption->encryptDataEncryptionKeys(true);
+    			} else {
+    				$keyEncryption->encryptDataEncryptionKeys();
+    			}
+    		}
+    	} else {
+    		echo 'This version of Magento is not eHub' . "\n";
+    	}
+    
+    }
+    
+    function encryptTestValueAction($options) {
+    	Wiz::getMagento();
+    	$encryptedValue = Mage::helper('core')->encrypt($options[0]);
+    	$config = Mage::getResourceModel('core/config');
+    	$config->saveConfig('wiz/encrypt/test', $encryptedValue, 'default', 0);
+    	Mage::app()->cleanCache();
+    }
+
+    function decryptTestValueAction($options) {
+    	Wiz::getMagento();
+    	$encryptedValue = Mage::getStoreConfig('wiz/encrypt/test');
+    	$decryptedValue = Mage::helper('core')->decrypt($encryptedValue);
+    	echo $decryptedValue;
     }
     
   }

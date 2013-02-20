@@ -63,6 +63,12 @@ class Encryption_Change extends Enterprise_Pci_Model_Resource_Key_Change {
 			}
 			$output[] = array('table' => $table, 'column'=> $tableInfo[2], 'count'=> $count);
 		}
+		// Re-Encrypt the test config if it is there.
+		$encryptedValue = Mage::getStoreConfig('wiz/encrypt/test');
+		$reEncryptedValue = $this->_encryptor->encrypt($this->_encryptor->decrypt($encryptedValue));
+		$config = Mage::getResourceModel('core/config');
+		$config->saveConfig('wiz/encrypt/test', $reEncryptedValue, 'default', 0);
+		
 		echo Wiz::tableOutput($output);
 	}
 	

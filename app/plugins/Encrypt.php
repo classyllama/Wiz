@@ -35,26 +35,30 @@ Class Wiz_Plugin_Encrypt extends Wiz_Plugin_Abstract {
     function resetKeyAction() {
 	 	Wiz::getMagento();
 
-	 	$file = Mage::getBaseDir('etc') . DS . 'local.xml';
-	 	if (!is_writeable($file)) {
-	 		throw new Exception('File %s is not writeable.', realpath($file));
+	 	if (Mage::getConfig()->getModuleConfig('Enterprise_Pci')){
+		 	$file = Mage::getBaseDir('etc') . DS . 'local.xml';
+		 	if (!is_writeable($file)) {
+		 		throw new Exception('File %s is not writeable.', realpath($file));
+		 	}
+		 	$contents = file_get_contents($file);
+		 	if (null === $key) {
+		 		$key = md5(time());
+		 	}
+		 	$encryptor = clone Mage::helper('core')->getEncryptor();
+		 	$encryptor->setNewKey($key);
+		 	$contents = preg_replace('/<key><\!\[CDATA\[(.+?)\]\]><\/key>/s',
+		 			'<key><![CDATA[' . $encryptor->exportKeys() . ']]></key>', $contents
+		 	);
+		 	
+	 		file_put_contents($file, $contents);
+			
+		 	Mage::app()->cleanCache();
+			
+		 	echo "\nPlease refer to the application's local.xml file for your new key\n";
+	 	} else {
+	 		echo 'This version of Magento is not Enterprise' . "\n";
+	 		
 	 	}
-	 	$contents = file_get_contents($file);
-	 	if (null === $key) {
-	 		$key = md5(time());
-	 	}
-	 	$encryptor = clone Mage::helper('core')->getEncryptor();
-	 	$encryptor->setNewKey($key);
-	 	$contents = preg_replace('/<key><\!\[CDATA\[(.+?)\]\]><\/key>/s',
-	 			'<key><![CDATA[' . $encryptor->exportKeys() . ']]></key>', $contents
-	 	);
-	 	
- 		file_put_contents($file, $contents);
-		
-	 	Mage::app()->cleanCache();
-		
-	 	echo "\nPlease refer to the application's local.xml file for your new key\n";
-		
     }
     
     /**
@@ -71,7 +75,7 @@ Class Wiz_Plugin_Encrypt extends Wiz_Plugin_Abstract {
      */
     function resetDataAction($options) {
     	Wiz::getMagento();
-    	if (class_exists(Enterprise_Pci_Model_Resource_Key_Change)){
+	 	if (Mage::getConfig()->getModuleConfig('Enterprise_Pci')){
     		require 'enterprise/Enterprise.php';
     
     		$changeEncryption = new Encryption_Change($options);
@@ -84,30 +88,15 @@ Class Wiz_Plugin_Encrypt extends Wiz_Plugin_Abstract {
     	 
     }
     
+  
     /**
-     * Encrypts the data keys with a master key file.
+     * Encrypts and stores a given value into the core_config_data table. After re-encryption is done
+     * you can test that it worked with the "wiz encrypt-decryptTestValue" command.
      *
-     * Command: wiz encrypt-encryptDataKeys
+     * Command: wiz encrypt-encryptTestValue valuetoencrypt
      *
      * @author Ben Robie <brobie@gmail.com>
      */
-    function encryptDataKeysAction($options) {
-    	Wiz::getMagento();
-    	if (class_exists(Cds_Pci_Model_Data_Encryption_Key)){
-			$keyEncryption = Mage::getModel('cds_pci/data_encryption_key');
-    		if ($keyEncryption){
-    			if ($options[0] == 'force'){
-    				$keyEncryption->encryptDataEncryptionKeys(true);
-    			} else {
-    				$keyEncryption->encryptDataEncryptionKeys();
-    			}
-    		}
-    	} else {
-    		echo 'This version of Magento is not eHub' . "\n";
-    	}
-    
-    }
-    
     function encryptTestValueAction($options) {
     	Wiz::getMagento();
     	$encryptedValue = Mage::helper('core')->encrypt($options[0]);
@@ -116,11 +105,19 @@ Class Wiz_Plugin_Encrypt extends Wiz_Plugin_Abstract {
     	Mage::app()->cleanCache();
     }
 
+    /**
+     * Decrypts and echos out the encrypted value sent in by the "wiz encrypt-encryptTestValue" command.
+     *
+     * Command: wiz encrypt-decryptTestValue
+     *
+     * @author Ben Robie <brobie@gmail.com>
+     */
     function decryptTestValueAction($options) {
     	Wiz::getMagento();
     	$encryptedValue = Mage::getStoreConfig('wiz/encrypt/test');
     	$decryptedValue = Mage::helper('core')->decrypt($encryptedValue);
-    	echo $decryptedValue;
+    	$output[] = array('Descripted Value' => $decryptedValue);
+		echo Wiz::tableOutput($output);
     }
     
   }

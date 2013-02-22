@@ -165,7 +165,7 @@ class Wiz {
                 }
             }
 
-			$_magento = Mage::app($scopeCode, $scopeId);
+            $_magento = Mage::app($scopeCode, $scopeId);
 
             // We only want to enable profiling if it has been turned on within the
             // configuration AND if the --profile argument was passed into the command. 

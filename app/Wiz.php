@@ -165,13 +165,13 @@ class Wiz {
                 }
             }
 
+            $_magento = Mage::app($scopeCode, $scopeId);
+
             // We only want to enable profiling if it has been turned on within the
             // configuration AND if the --profile argument was passed into the command. 
             if(Mage::getStoreConfig('dev/debug/profiler') && Wiz::getWiz()->getArg('profile')){
             	Varien_Profiler::enable();
             }
-            
-            $_magento = Mage::app($scopeCode, $scopeId);
         }
         return $_magento;
     }

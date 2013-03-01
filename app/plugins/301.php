@@ -10,7 +10,7 @@ Class Wiz_Plugin_301 extends Wiz_Plugin_Abstract {
     function urlskumapAction($options) {
         Wiz::getMagento('');
         $output = '';
-        $products = Mage::getModel('catalog/product')->getCollection();
+        $products = Mage::getModel('catalog/product')->getCollection()->addStoreFilter();
         foreach ($products as $product) {
             if (($sku = trim($product->getSku())) == '')
                 continue;
@@ -33,7 +33,8 @@ Class Wiz_Plugin_301 extends Wiz_Plugin_Abstract {
         Wiz::getMagento('');
         $output = '';
 
-        $categories = Mage::getModel('catalog/category')->getCollection();
+        $rootCategory = Mage::getModel('catalog/category')->load(Mage::app()->getStore()->getRootCategoryId());
+        $categories = Mage::getModel('catalog/category')->getCollection()->addPathFilter($rootCategory->getPath());
 
         foreach ($categories as $categoryModel) {
             $category = Mage::getModel('catalog/category')->load($categoryModel->getId());
@@ -49,7 +50,7 @@ Class Wiz_Plugin_301 extends Wiz_Plugin_Abstract {
             }
 
             $data[] = '"'.implode("\t", $breadcrumb).'"';
-            $output .= implode(', ', $data).PHP_EOL;
+            $output .= implode(',', $data).PHP_EOL;
         }
 
         if (strpos($options[0], '.') !== FALSE) {

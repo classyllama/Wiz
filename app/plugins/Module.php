@@ -8,7 +8,7 @@
  * http://opensource.org/licenses/osl-3.0.php
  *
  * DISCLAIMER
- * 
+ *
  * This program is provided to you AS-IS.  There is no warranty.  It has not been
  * certified for any particular purpose.
  *
@@ -21,7 +21,7 @@
 class Wiz_Plugin_Module extends Wiz_Plugin_Abstract {
 
     /**
-     * Lists all of the modules that are currently installed on the Magento installation, 
+     * Lists all of the modules that are currently installed on the Magento installation,
      * the version in their xml file, the version of the setup resource in the database,
      * their code pool, and what their active flag is.
      *
@@ -45,10 +45,14 @@ class Wiz_Plugin_Module extends Wiz_Plugin_Abstract {
         foreach ($modules as $moduleName => $moduleData) {
             $flag = strtolower(Mage::getConfig()->getNode('advanced/modules_disable_output/' . $moduleName, 'default'));
 
+            $cachedValue = '';
+            if (isset($resourceMappings[$moduleName])) {
+                $cachedValue = $resourceMappings[$moduleName];
+            }
             $moduleList[] = array(
                 'Module Name' => $moduleName,
                 'Version (xml)' => (string)$moduleData->version,
-                'Version (db)' => $resourceMappings[$moduleName] != '' ? (string)$result[$resourceMappings[$moduleName]] : 'n/a',
+                'Version (db)' => $cachedValue != '' ? (string) $result[$cachedValue] : 'n/a',
                 'Active' => $moduleData->active ? 'Active' : 'Disabled',
                 'Output' => !empty($flag) && 'false' !== $flag ? 'Disabled' : 'Enabled',
                 'Code Pool' => $moduleData->codePool,
@@ -61,7 +65,7 @@ class Wiz_Plugin_Module extends Wiz_Plugin_Abstract {
     /**
      * Enables a module.  You can pass a module name or a list of module names seperated
      * by spaces.
-     * 
+     *
      * Usage: wiz module-enable NS_ModuleName NS_ModuleName2
      *
      * @param List of modules to enable seperated by spaces.
@@ -116,13 +120,13 @@ class Wiz_Plugin_Module extends Wiz_Plugin_Abstract {
     /**
      * You can pass a module name or a list of module names seperated
      * by spaces.
-     * 
+     *
      * Usage: wiz module-disable NS_ModuleName1 NS_ModuleName2
-     * 
+     *
      * Please note: modules with dependencies will not be disabled unless all of the
      * dependencies are disabled first.  Modules with loaded dependencies will not be
      * disabled until those dependencies themselves are disabled.
-     * 
+     *
      * @param List of modules to disable seperated by spaces.
      * @author Nicholas Vahalik <nick@classyllama.com>
      */

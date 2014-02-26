@@ -8,7 +8,7 @@
  * http://opensource.org/licenses/osl-3.0.php
  *
  * DISCLAIMER
- * 
+ *
  * This program is provided to you AS-IS.  There is no warranty.  It has not been
  * certified for any particular purpose.
  *
@@ -118,8 +118,8 @@ class Wiz {
      * Instantiates and sets up Magento.  By default, use the admin scopeCode so we run
      * inside of the administration context.
      *
-     * @param string $scopeCode 
-     * @param string $scopeId 
+     * @param string $scopeCode
+     * @param string $scopeId
      * @return Mage_Core_Model_App
      * @author Nicholas Vahalik <nick@classyllama.com>
      */
@@ -127,7 +127,7 @@ class Wiz {
 
         /**
          * Our local copy of the Magento Application Object
-         * 
+         *
          * @see Mage_Core_Model_App
          */
         static $_magento;
@@ -168,8 +168,8 @@ class Wiz {
             $_magento = Mage::app($scopeCode, $scopeId);
 
             // We only want to enable profiling if it has been turned on within the
-            // configuration AND if the --profile argument was passed into the command. 
-            if(Mage::getStoreConfig('dev/debug/profiler') && Wiz::getWiz()->getArg('profile')){
+            // configuration AND if the --profile argument was passed into the command.
+            if (Mage::getStoreConfig('dev/debug/profiler') && Wiz::getWiz()->getArg('profile')) {
             	Varien_Profiler::enable();
             }
         }
@@ -201,13 +201,13 @@ class Wiz {
             else {
                 // Aw snap, it's on now!
                 $ourDirectory = dirname(dirname(__FILE__));
-                
+
                 // Do a quick sanity check to ensure that we "own" the directory.
                 $objectsInOurDirectory = scandir(dirname(dirname(__FILE__)));
 
-                // Only enable auto-upgrade if we have our own directory.  This will leave some 
+                // Only enable auto-upgrade if we have our own directory.  This will leave some
                 // people out, but for now it appears most people have it in ~/bin.
-                if (count($objectsInOurDirectory) <= 7 
+                if (count($objectsInOurDirectory) <= 7
                   && in_array('wiz.php', $objectsInOurDirectory)
                   && in_array('app', $objectsInOurDirectory)
                   && in_array('wiz', $objectsInOurDirectory)) {
@@ -241,24 +241,24 @@ class Wiz {
         // Check the remote service to see what the latest version of Wiz is.
     }
 
-    private function rrmdir($dir) { 
-        if (is_dir($dir)) { 
-            $objects = scandir($dir); 
-            foreach ($objects as $object) { 
-                if ($object != "." && $object != "..") { 
-                    if (filetype($dir."/".$object) == "dir") $this->rrmdir($dir."/".$object); else unlink($dir."/".$object); 
-                } 
-            } 
-            reset($objects); 
+    private function rrmdir($dir) {
+        if (is_dir($dir)) {
+            $objects = scandir($dir);
+            foreach ($objects as $object) {
+                if ($object != "." && $object != "..") {
+                    if (filetype($dir."/".$object) == "dir") $this->rrmdir($dir."/".$object); else unlink($dir."/".$object);
+                }
+            }
+            reset($objects);
             rmdir($dir);
-        } 
+        }
     }
 
     private function _findPlugins() {
 
         $plugins = array();
         $pluginFiles = new DirectoryIterator($this->pluginDirectory);
-        
+
         foreach ($pluginFiles as $file) {
             $fileExtension = substr($file->getFilename(), -3);
             if ($file->isFile() && $fileExtension == "php") {
@@ -303,7 +303,7 @@ class Wiz {
      * Gives you help on a command.  For simplicity's sake, it just returns the Comment
      * block in the source code.
      *
-     * @param string Command to get help on. 
+     * @param string Command to get help on.
      * @author Nicholas Vahalik <nick@classyllama.com>
      */
     public function helpAction($options) {
@@ -336,7 +336,7 @@ class Wiz {
         echo 'Available commands: '.PHP_EOL;
         echo PHP_EOL;
         foreach ($this->_availableCommands as $commandName => $commandArray) {
-            if(!array_key_exists('documentation', $commandArray) || trim($commandArray['documentation']) == '') {
+            if (!array_key_exists('documentation', $commandArray) || trim($commandArray['documentation']) == '') {
                 continue;
             }
             $docLines = explode(PHP_EOL, $commandArray['documentation']);
@@ -493,7 +493,7 @@ class Wiz {
      * @return string
      * @author Kevin Kirchner
      **/
-    public function getWebsiteCode()
+    public static function getWebsiteCode()
     {
         $wiz = Wiz::getWiz();
         return $wiz->getArg('website') ? $wiz->getArg('website') : Mage::app()->getWebsite()->getCode();
@@ -505,7 +505,7 @@ class Wiz {
      * @return string
      * @author Kevin Kirchner
      **/
-    public function getStoreCode()
+    public static function getStoreCode()
     {
         $wiz = Wiz::getWiz();
         return $wiz->getArg('store') ? $wiz->getArg('store') : Mage::app()->getStore()->getCode();
@@ -540,7 +540,7 @@ class Wiz {
             default:
                 $delimiter = ',';
                 $enclosure = '"';
-                // Quickly put everything 
+                // Quickly put everything
                 break;
             case 'pipe':
                 $delimiter = '|';
@@ -572,7 +572,7 @@ class Wiz {
                 $cell_length = strlen($cell);
                 $cell_count++;
                 if (!isset($cell_lengths[$key]) || $cell_length > $cell_lengths[$key]) $cell_lengths[$key] = $cell_length;
-            }    
+            }
         }
         array_pop($table);
 

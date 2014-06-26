@@ -97,7 +97,7 @@ class Wiz {
     static function getMagentoRoot() {
         static $magentoRoot = FALSE;
         if ($magentoRoot === FALSE) {
-            $wizMagentoRoot = array_key_exists('WIZ_MAGE_ROOT', $_ENV) ? $_ENV['WIZ_MAGE_ROOT'] : getcwd();
+            $wizMagentoRoot = getenv('WIZ_MAGE_ROOT') ? getenv('WIZ_MAGE_ROOT') : getcwd();
 
             // Run through all of the options until either we find something, or we've run out of places to look.
             do {

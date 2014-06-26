@@ -23,6 +23,7 @@ fi
 
 WIZ_DIR="`dirname $WIZ_PATH`";
 WIZ_PHP_VERSION="5.2";
+WIZ_INI="";
 
 # If no valid PHP executable has been set in WIZ_PHP_PATH, iterate PATH looking for one
 if [ ! -x "$WIZ_PHP_PATH" ] || [ "`$WIZ_PHP_PATH -r "echo (int) version_compare(PHP_VERSION, '$WIZ_PHP_VERSION', '>=');"`" == "0" ]; then
@@ -38,6 +39,11 @@ if [ ! -x "$WIZ_PHP_PATH" ] || [ "`$WIZ_PHP_PATH -r "echo (int) version_compare(
     done
 fi
 
+# If WIZ_INI_PATHFILE enviroment variable is set, look for and use php.ini file  located there.
+if [ -n "$WIZ_INI_PATHFILE" ]; then
+	WIZ_INI="-c $WIZ_INI_PATHFILE"
+fi
+
 # Validate that we have a valid executable file on our hands and that one has been found.
 if [ ! -x "$WIZ_PHP_PATH" ]; then
 	echo "ERROR: Could not find a PHP executable >= $WIZ_PHP_VERSION. Please set WIZ_PHP_PATH to a valid PHP executable binary and try again."
@@ -45,4 +51,4 @@ if [ ! -x "$WIZ_PHP_PATH" ]; then
 fi
 
 # Begin tool execution
-$WIZ_PHP_PATH -f "$WIZ_DIR/wiz.php" $@
+$WIZ_PHP_PATH $WIZ_INI  -f "$WIZ_DIR/wiz.php" $@

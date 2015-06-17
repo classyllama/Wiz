@@ -1,3 +1,6 @@
+# <em>IMPORTANT NOTICE</em>
+<strong>Wiz is no longer maintained and may or may not work with current versions of Magento. There are also no plans on porting it to work with Magento 2. It is reccomended that you use [n98-magerun](http://magerun.net/installation/) as an alternative.</strong>
+
 # Wiz
 
 Wiz is a CLI interface for Magento.  It aims to provide useful functionality for developers and administrators in a powerful and scriptable CLI format.

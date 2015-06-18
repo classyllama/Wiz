@@ -8,7 +8,7 @@
  * http://opensource.org/licenses/osl-3.0.php
  *
  * DISCLAIMER
- * 
+ *
  * This program is provided to you AS-IS.  There is no warranty.  It has not been
  * certified for any particular purpose.
  *
@@ -30,6 +30,9 @@ class Wiz_Plugin_Sql extends Wiz_Plugin_Abstract {
         $resources = Mage::getSingleton('core/resource');
         $connection = $resources->getConnection('core');
         $config = $connection->getConfig();
+        if (!isset($config['port'])) {
+            $config['port'] = 3306;
+        }
         return $config;
     }
 
@@ -48,18 +51,18 @@ class Wiz_Plugin_Sql extends Wiz_Plugin_Abstract {
             }
             echo $key . ' = '. $value.PHP_EOL;
         }
-        echo 'MySQL command line: '."mysql -u{$config['username']} -p{$config['password']}".( $config['port'] ? " -P{$config['port']}" : '')." -h{$config['host']} {$config['dbname']}".PHP_EOL;
+        echo 'MySQL command line: '."mysql -u{$config['username']} -p{$config['password']}".($config['port'] ? " -P{$config['port']}" : '')." -h{$config['host']} {$config['dbname']}".PHP_EOL;
     }
 
     /**
      * Opens up a shell command directly to the the database server.
      *
-     * @param string $options 
+     * @param string $options
      * @author Nicholas Vahalik <nick@classyllama.com>
      */
     public function cliAction($options) {
         $config = $this->_getDbConfig();
-        proc_close(proc_open("mysql -u{$config['username']} -p{$config['password']}".( $config['port'] ? " -P{$config['port']}" : '')." -h{$config['host']} {$config['dbname']}", array(0 => STDIN, 1 => STDOUT, 2 => STDERR), $pipes));
+        proc_close(proc_open("mysql -u{$config['username']} -p{$config['password']}".($config['port'] ? " -P{$config['port']}" : '')." -h{$config['host']} {$config['dbname']}", array(0 => STDIN, 1 => STDOUT, 2 => STDERR), $pipes));
     }
 
     /**
@@ -75,8 +78,10 @@ class Wiz_Plugin_Sql extends Wiz_Plugin_Abstract {
      * @author Nicholas Vahalik <nick@classyllama.com>
      */
     public function execAction($options) {
-        $query = mysql_real_escape_string(array_shift($options));
+        $batch = '';
         $config = $this->_getDbConfig();
+        $link = new mysqli($config['host'], $config['username'], $config['password'], $config['dbname'], $config['port']);
+        $query = $link->real_escape_string(array_shift($options));
         if (count($options) > 0 && $options[0] == 'batch') {
             $batch = '--batch';
         }
